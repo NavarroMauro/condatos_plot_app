@@ -1,0 +1,22 @@
+title: "Título"
+xlabel: ""
+ylabel: ""
+style: [  "styles/base.mplstyle", "styles/condatos.mplstyle" ]
+width_in: 3.35
+height_in: 2.4
+palette: null
+bar:
+  edgecolor: null
+  linewidth: 0.0
+  bar_width: 0.8
+grid: false
+rotate_xticks: 0
+tight_layout: true
+formats: ["png","svg","pdf","webp","avif","jpg"]
+jpg_quality: 92
+webp_quality: 92
+avif_quality: 55
+scour_svg: true
+value_labels: true
+value_fmt: ".1f"
+value_offset: 0.02

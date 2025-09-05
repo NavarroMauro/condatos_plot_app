@@ -1,0 +1,51 @@
+template: "templates/stackedbar-vertical-condatos.yml"
+outfile: "out/medallas-stacked"
+data:
+  csv: "data/juegos_panamericanos_junior_2025.csv"
+
+overrides:
+  title: "Medallas por país"
+  subtitle: "Juegos Panamericanos Junior 2025"
+  category_col: "pais"             # 👈 eje X
+  series_order: ["oro","plata","bronce"]  # 👈 solo estas series
+  # percent: true                  # (opcional) 100% apilado
+  # value_labels: true              # Mostrar etiquetas dentro de cada segmento
+  colors:                               # Colores oficiales de medallas
+    oro: "#C9B037"
+    plata: "#B4B4B4"
+    bronce: "#AD8A56"
+  bar:
+    bar_width: 0.9
+    linewidth: 0.1
+    edgecolor: "black"
+    legend: true
+  legend_loc: "upper right"
+  grid: true
+  # (opcional) ajustes visuales comunes
+  layout:
+    margin_top: 0.18
+    margin_bottom: 0.12
+    margin_left: 0.08
+    margin_right: 0.02
+  header:
+    align: center
+    title_size: 26
+    title_weight: bold
+    subtitle_size: 13
+    subtitle_color: "0.35"
+  branding:
+    source: "Comité Organizador de los Panamericanos Junior 2025"
+    note: "Licencia CC BY-NC-SA 4.0"
+    icons: ["assets/cc_cc.png","assets/cc_by.png","assets/cc_nc.png","assets/cc_sa.png"]
+    icons_zoom: 0.028
+    icons_x: 0.13
+    icons_y: 0.026
+    logo: "assets/logo_condatos.png"
+    logo_side: right
+    logo_width: 0.085
+  flags:
+    enabled: true
+    column: "flag_url"   # columna del CSV con URL o ruta local a la bandera
+    zoom: 0.12           # tamaño relativo del icono
+    y_offset: 2          # separación vertical (en puntos) sobre la barra
+    cache_dir: "assets/flags"   # dónde guardar las banderas descargadas

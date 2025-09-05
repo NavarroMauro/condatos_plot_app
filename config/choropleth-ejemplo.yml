@@ -1,0 +1,17 @@
+template: templates/choropleth-condatos.yml
+outfile: out/condatos-choropleth
+data:
+  inline:
+    key: iso3
+    value: valor
+    rows:
+      - {iso3: CHL, valor: 70}
+      - {iso3: PER, valor: 55}
+      - {iso3: COL, valor: 60}
+      - {iso3: MEX, valor: 80}
+      - {iso3: ARG, valor: 65}
+overrides:
+  title: "Índice (ejemplo) · Choropleth LATAM"
+  subtitle: "Valores ficticios por país"
+  cmap: "YlOrRd"
+  legend: true

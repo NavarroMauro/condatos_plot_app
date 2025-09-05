@@ -1,0 +1,40 @@
+# Tamaño por defecto; las plantillas suelen sobreescribir con width_in/height_in
+figure.figsize: 3.35, 2.1
+figure.dpi: 300
+savefig.dpi: 300
+savefig.bbox: tight
+savefig.pad_inches: 0
+figure.frameon: false
+
+# Tipografía
+font.family: sans-serif
+font.sans-serif: Nunito, Bebas_Neue, Orbitron, DejaVu Sans, Arial, Helvetica
+font.weight: normal
+font.size: 12
+
+# Ejes
+axes.titlesize: 10
+axes.labelsize: 8.5
+axes.linewidth: 0.8
+axes.spines.top: False
+axes.spines.right: False
+axes.spines.bottom: False
+axes.spines.left: False
+axes.grid: False
+
+# Ticks
+xtick.direction: out
+ytick.direction: out
+xtick.major.width: 0.6
+ytick.major.width: 0.6
+xtick.major.pad: 2.5
+ytick.major.pad: 2.5
+
+# Líneas / leyenda
+lines.linewidth: 1.2
+legend.frameon: False
+
+# Footer/Branding adjustments
+figure.subplot.bottom: 0.15
+figure.subplot.left: 0.22
+figure.subplot.right: 0.88

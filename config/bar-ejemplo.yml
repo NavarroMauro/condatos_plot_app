@@ -1,0 +1,30 @@
+template: "templates/bar-condatos.yml"
+outfile: "out/condatos-barras"
+data:
+  inline:
+    categories: ["Chile","Perú","Colombia","México","Argentina"]
+    values: [42.5, 37.2, 31.8, 55.1, 28.4]
+overrides:
+  title: "Índice LATAM"
+  subtitle: "Valores de ejemplo"
+  layout:
+    margin_top: 0.18
+    margin_bottom: 0.12
+    margin_left: 0.08
+    margin_right: 0.02
+  header:
+    align: center        # o left
+    title_size: 26
+    title_weight: bold
+    subtitle_size: 13
+    subtitle_color: "0.35"
+  branding:
+    source: "Comité Organizador..."
+    note: "Licencia CC BY-NC-SA 4.0"
+    icons: ["assets/cc_cc.png","assets/cc_by.png","assets/cc_nc.png","assets/cc_sa.png"]
+    icons_zoom: 0.032     # más pequeño
+    icons_x: 0.14
+    icons_y: 0.025        # sube/baja los iconos
+    logo: "assets/logo_condatos.png"
+    logo_side: right
+    logo_width: 0.09      # más pequeño

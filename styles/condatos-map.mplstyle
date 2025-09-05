@@ -1,0 +1,23 @@
+# Diferencias para mapas; el resto lo heredas de base/condatos
+axes.labelsize: 10
+font.family: DejaVu Sans
+font.size: 9.5
+axes.titlesize: 13
+axes.titleweight: bold
+legend.fontsize: 8.5
+
+
+
+# Fondo claro tipo océano y ticks grises sobrios
+axes.facecolor: 0.92
+xtick.color: tab:gray
+ytick.color: tab:gray
+
+# Sin contorno de eje
+axes.linewidth: 0
+
+
+axes.spines.top: False
+axes.spines.right: False
+axes.spines.left: False
+axes.spines.bottom: False

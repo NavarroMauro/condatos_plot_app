@@ -1,0 +1,17 @@
+title: "Título"
+style: [  "styles/base.mplstyle", "styles/condatos.mplstyle" ]
+width_in: 3.35
+height_in: 2.4
+
+formats: ["png","svg","pdf","webp"]
+branding:
+  logo: assets/logo_condatos.png
+  left_text: ""        # opcional
+  source: "ConDatos (elaboración propia)"
+  note: "Muestra 2024; valores en %"
+  date_auto: true
+  date_format: "%Y-%m-%d"
+  separator: true
+  logo_width: 0.09     # ajusta según el logo
+  fontsize: 7.6
+  color: "0.25"

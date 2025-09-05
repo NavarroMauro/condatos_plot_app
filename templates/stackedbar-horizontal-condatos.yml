@@ -1,0 +1,176 @@
+# Template base para gráficos de barras horizontales apiladas
+dpi: 300  # o 450 para calidad ultra
+formats: ["png", "svg", "pdf"]
+jpg_quality: 95
+webp_quality: 95
+avif_quality: 80
+
+image_quality:
+  interpolation: "lanczos"
+  antialiased: true
+  rasterized: false
+
+style: ["styles/base.mplstyle", "styles/condatos.mplstyle"]
+
+# Configuración unificada de layout y espaciado
+layout:
+  margin_left: 0.22     # espacio para etiquetas del eje Y
+  margin_right: 0.12    # espacio para totales/banderas
+  margin_bottom: 0.15   # espacio para footer/branding
+  margin_top: 0.35      # AUMENTADO: más espacio para el header (30% de la figura)
+
+# Configuración del header
+header:
+  height: 0.30          # AUMENTADO: 30% de la figura para el header
+  align: "plot"         # alinear con el área del gráfico
+  title_size: 38
+  subtitle_size: 28
+  spacing: 0.08         # AUMENTADO: más espacio entre título y subtítulo
+  top_margin: 0.05      # espacio arriba del título
+  title_y: 0.85        # NUEVO: posición específica para el título
+  subtitle_y: 0.75     # NUEVO: posición específica para el subtítulo
+  use_plot_limits: true # usar límites del gráfico para el ancho
+
+# Configuración de títulos acotados al ancho del gráfico
+title:
+  text: ""
+  font:
+    family: "Nunito"
+    color: "#333333"
+  align: "center"       # NUEVO: alineación dentro del espacio disponible
+  wrap: true           # NUEVO: permitir múltiples líneas si es necesario
+
+subtitle:
+  text: ""
+  font:
+    family: "Nunito"
+    color: "#666666"
+  align: "center"      # NUEVO: alineación dentro del espacio disponible
+  wrap: true          # NUEVO: permitir múltiples líneas si es necesario
+
+# Configuración del autosize (solo tamaños)
+autosize:
+  enabled: true
+  mode: "rows"
+  width_in: 14
+  height_per_row: 1.5
+  min_height: 18
+  max_height: 22
+
+# Ajustes de las barras
+bar:
+  width: 0.90
+  linewidth: 0.1
+  edgecolor: "white"
+  gap: 0.1
+
+# Leyenda (únicamente estilos)
+legend: true
+legend_loc: "center right"
+legend_font:
+  family: "DejaVu Sans"
+  size: 22
+  weight: "normal"
+  color: "#333333"
+  alpha: 1.0
+
+# Etiquetas por segmento
+value_labels:
+  enabled: true
+  location: "center"
+  x_offset: 0
+  y_offset: 0
+  min_height: 3.0
+  font:
+    size: 12
+    family: "DejaVu Sans"
+    weight: "normal"
+    color: "#FFF"
+    alpha: 1.0
+
+# Etiquetas de total
+total_labels:
+  enabled: true
+  location: "outside"
+  x_offset: 4
+  font:
+    size: 12
+    family: "DejaVu Sans"
+    weight: "bold"
+    color: "#000000"
+    alpha: 1.0
+
+# Branding
+branding:
+  separator: false
+  separator_color: "0.85"
+  separator_alpha: 1.0
+  separator_width: 0.6
+  separator_y: 0.15
+  pad: 0.035
+  text_y: 0.05
+  icons_y: 0.12
+  logo_y: 0.12
+  fontsize: 12
+  color: "0.25"
+  alpha: 0.95
+  font_family: "DejaVu Sans"
+  font_weight: "normal"
+  text_separator: " · "
+  icons_zoom: 0.050
+  icons_gap: 0.055
+  icons_alpha: 0.95
+  logo_side: "right"
+  logo_width: 0.06
+  logo_alpha: 0.95
+  layout:
+    align: "center"
+
+# Configuración del eje Y
+yaxis:
+  font:
+    family: "DejaVu Sans"
+    size: 22
+    weight: "normal"
+    color: "#333333"
+  ticks:
+    size: 2
+    pad: 5
+    direction: "out"
+  spines:
+    visible: false
+  grid:
+    enabled: false
+
+# Configuración del eje X
+xaxis:
+  visible: false
+  spines:
+    visible: false
+  font:
+    family: "DejaVu Sans"
+    size: 16
+    weight: "normal"
+    color: "#333333"
+
+# Configuración del eje roto
+break_axis:
+  enabled: true
+  threshold: 6
+  fraction: 0.1
+
+# Configuración del eje X
+axis:
+  x:
+    extra_space: 0.10
+
+# Configuración de banderas
+flags:
+  enabled: true
+  column: "flag_url"
+  category_col: "pais"
+  place: "end"
+  zoom: 0.05
+  x_offset: 22
+  y_offset: 0
+  cache_dir: "assets/flags"

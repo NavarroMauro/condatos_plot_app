@@ -1,0 +1,35 @@
+rank,code,pais,oro,plata,bronce,total,flag_url
+1,BRA,Brasil,70,50,55,175,/assets/flags/BRA.png
+2,USA,Estados Unidos de América,54,42,46,142,/assets/flags/USA.png
+3,COL,Colombia,48,27,40,115,/assets/flags/COL.png
+4,MEX,México,29,45,55,129,/assets/flags/MEX.png
+5,ARG,Argentina,27,38,30,95,/assets/flags/ARG.png
+6,CAN,Canadá,19,22,22,63,/assets/flags/CAN.png
+7,CUB,Cuba,19,13,15,47,/assets/flags/CUB.png
+8,CHI,Chile,18,19,28,65,/assets/flags/CHI.png
+9,VEN,Venezuela,12,15,19,46,/assets/flags/VEN.png
+10,PUR,Puerto Rico,7,7,13,27,/assets/flags/PUR.png
+11,GUA,Guatemala,7,3,4,14,/assets/flags/GUA.png
+12,ECU,Ecuador,6,13,14,33,/assets/flags/ECU.png
+13,JAM,Jamaica,4,5,6,15,/assets/flags/JAM.png
+14,PAR,Paraguay,3,6,14,23,/assets/flags/PAR.png
+15,PER,Perú,3,5,15,23,/assets/flags/PER.png
+16,URU,Uruguay,1,6,6,13,/assets/flags/URU.png
+17,TTO,Trinidad y Tobago,1,2,8,11,/assets/flags/TTO.png
+18,DOM,República Dominicana,1,2,5,8,/assets/flags/DOM.png
+19,ISV,Islas Vírgenes de los Estados Unidos,1,2,0,3,/assets/flags/ISV.png
+20,BOL,Bolivia,1,1,4,6,/assets/flags/BOL.png
+21,BAH,Bahamas,1,1,2,4,/assets/flags/BAH.png
+21,NCA,Nicaragua,1,1,2,4,/assets/flags/NCA.png
+21,PAN,Panamá,1,1,2,4,/assets/flags/PAN.png
+24,ARU,Aruba,1,1,0,2,/assets/flags/ARU.png
+25,CAY,Islas Caimán,1,0,1,2,/assets/flags/CAY.png
+26,DMA,Dominica,1,0,0,1,/assets/flags/DMA.png
+26,HAI,Haití,1,0,0,1,/assets/flags/HAI.png
+28,BER,Bermudas,0,2,1,3,/assets/flags/BER.png
+28,ESA,El Salvador,0,2,1,3,/assets/flags/ESA.png
+30,GRN,Granada,0,1,1,2,/assets/flags/GRN.png
+30,IVB,Islas Vírgenes Británicas,0,1,1,2,/assets/flags/IVB.png
+32,BAR,Barbados,0,1,0,1,/assets/flags/BAR.png
+33,GUY,Guyana,0,0,3,3,/assets/flags/GUY.png
+34,CRC,Costa Rica,0,0,1,1,/assets/flags/CRC.png

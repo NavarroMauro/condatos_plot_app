@@ -1,0 +1,11 @@
+# Ajustes por encima del base
+axes.titlesize: 11
+axes.titleweight: bold
+axes.labelsize: 9
+axes.linewidth: 0.85
+lines.linewidth: 1.4
+legend.fontsize: 8.8
+patch.edgecolor: none
+
+# Paleta (descomenta si quieres forzarla globalmente)
+# axes.prop_cycle: cycler(color=["#1F6FEB","#00B5D8","#F25F5C","#F2C14E","#6B7280","#111827"])

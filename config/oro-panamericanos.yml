@@ -1,0 +1,29 @@
+template: templates/
+outfile: out/oro-panamericanos
+data:
+  csv: data/juegos_panamericanos_junior_2025.csv
+  csv_key: iso3
+  value_col: oro
+overrides:
+  title: "TITULO"
+  subtitle: "subtitulo"
+  layout:
+    margin_top: 0.18
+    margin_bottom: 0.12
+    margin_left: 0.08
+    margin_right: 0.02
+  header:
+    align: center
+    title_size: 26
+    title_weight: bold
+    subtitle_size: 13
+    subtitle_color: "0.35"
+  branding:
+    source: "Fuente: Aca la fuente de los datos"
+    icons: ["assets/cc_cc.png","assets/cc_by.png","assets/cc_nc.png","assets/cc_sa.png"]
+    icons_zoom: 0.030   # ajusta tamaño de iconos
+    icons_x: 0.14
+    icons_y: 0.025
+    logo: "assets/logo_condatos.png"
+    logo_side: right
+    logo_width: 0.085   # ajusta tamaño del logo

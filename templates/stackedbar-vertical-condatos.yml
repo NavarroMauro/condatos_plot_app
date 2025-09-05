@@ -1,0 +1,48 @@
+# templates/stackedbar-vertical-condatos.yml
+style: ["styles/base.mplstyle", "styles/condatos-map.mplstyle"]  # o el par de estilos que uses
+width_in: 6.2
+height_in: 4.2
+formats: ["png", "svg", "pdf"]
+
+bar:
+  bar_width: 0.65
+  linewidth: 0.8
+  edgecolor: "white"
+
+# Colores por nombre de serie (opcional; defaults incluidos)
+colors:
+  Oro:    "#C9B037"
+  Plata:  "#B4B4B4"
+  Bronce: "#AD8A56"
+
+# Orden de apilamiento
+series_order: ["Oro","Plata","Bronce"]
+
+# Comportamiento
+percent: false           # true → normaliza a 100%
+legend: true
+legend_loc: "upper right"
+value_labels: false      # etiquetas dentro de cada segmento
+min_label_height: 3.0    # umbral para mostrar etiquetas (en % si percent=true)
+total_labels: true       # etiqueta con el total arriba
+yfmt: "{:.0f}"           # o "{:.0f}%"
+
+# Layout/header/branding pueden venir por defecto aquí:
+layout:
+  margin_top: 0.18
+  margin_bottom: 0.12
+  margin_left: 0.08
+  margin_right: 0.02
+header:
+  align: center
+  title_size: 26
+  title_weight: bold
+  subtitle_size: 13
+  subtitle_color: "0.35"
+branding:
+  source: ""
+  note: ""
+  icons: []
+  logo: "assets/logo_condatos.png"
+  logo_side: right
+  logo_width: 0.085

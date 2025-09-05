@@ -1,0 +1,57 @@
+{
+  "type": "FeatureCollection",
+  "name": "latam_countries_min",
+  "crs": {"type": "name","properties":{"name":"EPSG:4326"}},
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {"ISO_A3":"CHL","NAME_EN":"Chile"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-75.0,-56.0],[-66.0,-56.0],[-66.0,-17.0],[-75.0,-17.0],[-75.0,-56.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"ISO_A3":"PER","NAME_EN":"Peru"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-82.0,-18.0],[-69.0,-18.0],[-69.0,-0.0],[-82.0,-0.0],[-82.0,-18.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"ISO_A3":"COL","NAME_EN":"Colombia"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-79.0,-4.0],[-67.0,-4.0],[-67.0,13.0],[-79.0,13.0],[-79.0,-4.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"ISO_A3":"MEX","NAME_EN":"Mexico"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-118.0,14.0],[-86.0,14.0],[-86.0,33.0],[-118.0,33.0],[-118.0,14.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"ISO_A3":"ARG","NAME_EN":"Argentina"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-73.0,-55.0],[-53.0,-55.0],[-53.0,-21.0],[-73.0,-21.0],[-73.0,-55.0]
+        ]]
+      }
+    }
+  ]
+}
