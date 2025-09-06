@@ -6,21 +6,12 @@ data:
 
 overrides:      # Calculado: 1.0 - margin_left - margin_right (1.0 - 0.22 - 0.12)
   title:
-    text: "Medallas por país – Juegos Panamericanos Junior Asunción 2025"
+    text: "\n   Medallas por país - Juegos Panamericanos Junior Asunción 2025"
     wrap: true         # Habilitar wrapping dentro del ancho definido
   
   subtitle:
     text: "Total de preseas ganadas (oro, plata y bronce) en los Juegos Panamericanos Junior."
     wrap: true         # Habilitar wrapping dentro del ancho definido
-
-  # # Layout - definiendo explícitamente los márgenes
-  # layout:
-  #   margin_left: 0.22    # espacio para etiquetas Y
-  #   margin_right: 0.12   # espacio para banderas/totales
-  #   margin_top: 0.15     # espacio para el header
-  #   margin_bottom: 0.15  # espacio para el footer
-
-  # Resto de la configuración igual...
   branding:
     source: "Pagina oficial de los Juegos Panamericanos Junior Asunción 2025, https://www.asu2025.org.py/"
     note: "Licencia CC BY-NC-SA 4.0"

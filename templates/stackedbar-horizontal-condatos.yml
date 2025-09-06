@@ -17,7 +17,7 @@ layout:
   margin_left: 0.22     # espacio para etiquetas del eje Y
   margin_right: 0.12    # espacio para totales/banderas
   margin_bottom: 0.15   # espacio para footer/branding
-  margin_top: 0.35      # AUMENTADO: más espacio para el header (30% de la figura)
+  margin_top: 0.30      # AUMENTADO: más espacio para el header (30% de la figura)
 
 # Configuración del header
 header:
@@ -25,10 +25,10 @@ header:
   align: "plot"         # alinear con el área del gráfico
   title_size: 38
   subtitle_size: 28
-  spacing: 0.08         # AUMENTADO: más espacio entre título y subtítulo
+  spacing: 0.1         # AUMENTADO: más espacio entre título y subtítulo
   top_margin: 0.05      # espacio arriba del título
-  title_y: 0.85        # NUEVO: posición específica para el título
-  subtitle_y: 0.75     # NUEVO: posición específica para el subtítulo
+  title_y: 0.90        # NUEVO: posición específica para el título
+  subtitle_y: 0.70     # NUEVO: posición específica para el subtítulo
   use_plot_limits: true # usar límites del gráfico para el ancho
 
 # Configuración de títulos acotados al ancho del gráfico
@@ -53,9 +53,9 @@ autosize:
   enabled: true
   mode: "rows"
   width_in: 14
-  height_per_row: 1.5
-  min_height: 18
-  max_height: 22
+  height_per_row: 1.8
+  min_height: 20
+  max_height: 24
 
 # Ajustes de las barras
 bar:
@@ -68,7 +68,7 @@ bar:
 legend: true
 legend_loc: "center right"
 legend_font:
-  family: "DejaVu Sans"
+  family: "Nunito"
   size: 22
   weight: "normal"
   color: "#333333"
@@ -83,7 +83,7 @@ value_labels:
   min_height: 3.0
   font:
     size: 12
-    family: "DejaVu Sans"
+    family: "Nunito"
     weight: "normal"
     color: "#FFF"
     alpha: 1.0
@@ -114,7 +114,7 @@ branding:
   fontsize: 12
   color: "0.25"
   alpha: 0.95
-  font_family: "DejaVu Sans"
+  font_family: "Nunito"
   font_weight: "normal"
   text_separator: " · "
   icons_zoom: 0.050
@@ -129,8 +129,8 @@ branding:
 # Configuración del eje Y
 yaxis:
   font:
-    family: "DejaVu Sans"
-    size: 22
+    family: "Nunito"
+    size: 14
     weight: "normal"
     color: "#333333"
   ticks:
@@ -170,7 +170,7 @@ flags:
   column: "flag_url"
   category_col: "pais"
   place: "end"
-  zoom: 0.05
+  zoom: 0.07
   x_offset: 22
   y_offset: 0
   cache_dir: "assets/flags"

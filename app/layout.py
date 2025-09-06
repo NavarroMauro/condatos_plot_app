@@ -27,44 +27,39 @@ def _draw_header(fig, params: Mapping[str, Any]) -> float:
     """
     Dibuja el header como una entidad aislada, alineado con el área del gráfico.
     """
-    # Procesamiento de título y subtítulo
-    title = params.get("title", {})
-    subtitle = params.get("subtitle", {})
-
-    # Extraer el texto correctamente del diccionario
-    title_text = title.get("text", "") if isinstance(title, dict) else str(title)
-    subtitle_text = subtitle.get("text", "") if isinstance(subtitle, dict) else str(subtitle)
-
-    if not (title_text or subtitle_text):
-        return 0.0
-
-    # Configuración
+    # Obtener configuración del header
     H = params.get("header", {}) or {}
-    title_size = float(H.get("title_size", 40))
-    title_weight = H.get("title_weight", "bold")
-    subtitle_size = float(H.get("subtitle_size", 28))
-
+    title_config = params.get("title", {}) or {}
+    subtitle_config = params.get("subtitle", {}) or {}
+    
+    # Extraer texto y configuración
+    title_text = title_config.get("text", "")
+    subtitle_text = subtitle_config.get("text", "")
+    title_size = H.get("title_size", 38)
+    subtitle_size = H.get("subtitle_size", 28)
+    title_weight = title_config.get("font", {}).get("weight", "bold")
+    
     # Usar la altura del header desde la configuración
-    header_height = float(H.get("height", 0.30))  # Usar el valor del YAML
-    header_top = 1.0
-    header_bottom = header_top - header_height
+    header_height = float(H.get("height", 0.25))  # Reducido a 25%
     
-     # SIMPLIFICADO: Usar valores absolutos directamente
-    title_y = 0.85     # Posición absoluta del título
-    subtitle_y = 0.75  # Posición absoluta del subtítulo
-
     # Obtener márgenes para alinear con el gráfico
-    ml, mr, mt, mb = _get_layout(params)
+    ml = float(params.get("layout", {}).get("margin_left", 0.22))
+    mr = float(params.get("layout", {}).get("margin_right", 0.12))
     
-    # Calcular el centro del área del gráfico
-    x_center = ml + (1.0 - ml - mr) / 2
-
-    # DEBUG: Imprimir valores justo antes de dibujar
-    print(f"DEBUG: Header height: {header_height:.2f}")
-    print(f"DEBUG: Header zone: {header_bottom:.2f} to {header_top:.2f}")
-    print(f"DEBUG: Title y: {title_y:.2f}, Subtitle y: {subtitle_y:.2f}")
-
-
+    # Crear un Axes específico para el header con posición ajustada
+    header_ax = fig.add_axes([
+        ml,                 # izquierda
+        1.0 - header_height,# abajo
+        1.0 - ml - mr,     # ancho
+        header_height      # alto
+    ])
+    
+    # Configurar el Axes del header
+    header_ax.set_xticks([])
+    header_ax.set_yticks([])
+    for spine in header_ax.spines.values():
+        spine.set_visible(False)
+    
     # Función para wrapping de texto
     def wrap_text(text, fontsize):
         from textwrap import wrap
@@ -72,80 +67,76 @@ def _draw_header(fig, params: Mapping[str, Any]) -> float:
         chars = int(width * fig.get_figwidth() * 72 / (fontsize * 0.5))
         return '\n'.join(wrap(text, width=chars))
 
-    # Dibujar título con wrapping
+    # Dibujar título usando el Axes del header
     if title_text:
         wrapped_title = wrap_text(title_text, title_size)
-        fig.text(x_center, title_y,
+        header_ax.text(0.5, 0.85,  # Ajustado a 85% desde abajo
                 wrapped_title,
                 ha='center',
                 va='top',
                 fontsize=title_size,
                 fontweight=title_weight,
                 fontfamily='Nunito',
-                color='#333333')
+                color='#333333',
+                transform=header_ax.transAxes)
 
-    # Dibujar subtítulo con wrapping
+    # Dibujar subtítulo usando el Axes del header
     if subtitle_text:
         wrapped_subtitle = wrap_text(subtitle_text, subtitle_size)
-        fig.text(x_center, subtitle_y,
+        header_ax.text(0.5, 0.35,  # Ajustado a 35% desde abajo
                 wrapped_subtitle,
                 ha='center',
                 va='top',
                 fontsize=subtitle_size,
                 fontfamily='Nunito',
-                color='#666666')
+                color='#666666',
+                transform=header_ax.transAxes)
 
-    return mt
+    return header_height
 
 def apply_frame(fig, params: Mapping[str, Any]):
     """
-    Aplica el layout general respetando las tres zonas:
-    - Header: 25% superior
-    - Body: 60% central
-    - Footer: 15% inferior
+    Aplica el layout general respetando las tres zonas.
     """
     # Configurar DPI
     dpi = float(params.get("dpi", 300))
     fig.set_dpi(dpi)
     
-     # Obtenemos los márgenes y altura del header desde la configuración
+    # Obtenemos los márgenes y altura del header desde la configuración
     H = params.get("header", {}) or {}
-    header_height = float(H.get("height", 0.30))  # Usar el valor del YAML
-
+    header_height = float(H.get("height", 0.25))  # Mantener consistente con _draw_header
     
     # Obtenemos los márgenes
     ml, mr, mt, mb = _get_layout(params)
     
-   # ACTUALIZADO: Definimos las zonas usando el header_height del YAML
-    footer_height = 0.15  # 15% para footer
-    body_height = 1.0 - header_height - footer_height  # Resto para el gráfico
+    # Configurar los límites de la figura
+    fig.set_size_inches(fig.get_figwidth(), fig.get_figheight())
     
-    # Calculamos las posiciones verticales
-    header_top = 1.0
-    header_bottom = header_top - header_height
-    body_top = header_bottom
-    body_bottom = footer_height
-    
-    # Primero ajustamos los márgenes generales
+    # Ajustar los márgenes
     fig.subplots_adjust(
         left=ml,
         right=1.0 - mr,
-        top=header_top,     # NUEVO: Usamos toda la altura
-        bottom=0            # NUEVO: Desde el fondo
+        top=0.95,          # Dar más espacio arriba
+        bottom=0
     )
     
-    # Ajustamos el área del gráfico a su zona específica
+    # Definir zonas
+    footer_height = 0.15
+    body_height = 1.0 - header_height - footer_height
+    
+    # Posicionar el área del gráfico
     for ax in fig.axes:
         ax.set_position([
-            ml,              # izquierda
-            body_bottom,     # NUEVO: comienza sobre el footer
-            1.0 - ml - mr,  # ancho
-            body_height     # NUEVO: altura calculada
+            ml,
+            footer_height,
+            1.0 - ml - mr,
+            body_height
         ])
     
-    # Dibujamos el header en su zona
+    # Dibujar el header cuando todo lo demás está configurado
     _draw_header(fig, params)
     
+    # Actualización final
     fig.canvas.draw()
 
 
