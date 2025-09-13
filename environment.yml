@@ -2,7 +2,6 @@ name: condatos-figs
 channels:
   - conda-forge
   - defaults
-channel_priority: strict
 
 dependencies:
   # Núcleo
@@ -18,8 +17,8 @@ dependencies:
   - matplotlib>=3.10,<3.12
   - seaborn
   - pillow
-  - pillow-heif        # AVIF/HEIF (necesita register_heif_opener en tu código)
-  - scour              # minificar SVG (línea de comandos)
+  - pillow-heif
+  - scour
 
   # Mapas
   - geopandas
@@ -27,12 +26,15 @@ dependencies:
   - pyproj
   - fiona
   - mapclassify
-  - rtree              # (opcional pero útil para operaciones espaciales)
+  - rtree
 
   # Exportadores opcionales
   - cairo
-  - cairosvg           # convertir SVG<->PNG si lo necesitas en algún paso
+  - cairosvg
 
   # Compresión/soporte extra
   - imageio
-  - libwebp            # soporte WebP en Pillow (conda-forge ya lo resuelve)
+  - libwebp
+
+  # Tooling
+  - ruff

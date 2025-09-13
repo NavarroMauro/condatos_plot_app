@@ -1,176 +1,235 @@
-# Template base para gráficos de barras horizontales apiladas
-dpi: 300  # o 450 para calidad ultra
+# templates/simple-stackedbar-horizontal-template.yml
+# Template base para gráficos de barras horizontales apiladas simplificado
+
+# Configuración general
+dpi: 300
 formats: ["png", "svg", "pdf"]
-jpg_quality: 95
-webp_quality: 95
-avif_quality: 80
 
-image_quality:
-  interpolation: "lanczos"
-  antialiased: true
-  rasterized: false
+# Dimensiones base de la figura
+width_in: 12
+height_in: 14
 
-style: ["styles/base.mplstyle", "styles/condatos.mplstyle"]
+# Configuración de márgenes
+margins:
+  auto_adjust: true    # Ajuste automático del margen izquierdo basado en longitud de texto
+  left: null           # Valor manual (null para usar auto_adjust)
+  right: 0.02          # Margen derecho
+  top: 0.15            # Margen superior (altura del header) - Aumentado para más espacio
+  bottom: 0.12         # Margen inferior
+  text_padding: 0.1    # Espacio adicional después del texto (en pulgadas)
+  min_left: 0.1        # Valor mínimo para el margen izquierdo
+  max_left: 0.25       # Valor máximo para el margen izquierdo
 
-# Configuración unificada de layout y espaciado
-layout:
-  margin_left: 0.22     # espacio para etiquetas del eje Y
-  margin_right: 0.12    # espacio para totales/banderas
-  margin_bottom: 0.15   # espacio para footer/branding
-  margin_top: 0.30      # AUMENTADO: más espacio para el header (30% de la figura)
+# Configuración de espaciado de título y subtítulo
+# Este sistema de posicionamiento basado en márgenes es más robusto
+# y evita problemas con title_y_position y subtitle_y_position
+title_spacing:
+  top_margin: 0.08           # 8% de espacio desde el borde superior
+  bottom_margin: 0.10        # 10% entre título y subtítulo
+  subtitle_top_margin: 0.05  # 5% adicional antes del subtítulo
+  subtitle_bottom_margin: 0.10 # 10% debajo del subtítulo
 
-# Configuración del header
-header:
-  height: 0.30          # AUMENTADO: 30% de la figura para el header
-  align: "plot"         # alinear con el área del gráfico
-  title_size: 38
-  subtitle_size: 28
-  spacing: 0.1         # AUMENTADO: más espacio entre título y subtítulo
-  top_margin: 0.05      # espacio arriba del título
-  title_y: 0.90        # NUEVO: posición específica para el título
-  subtitle_y: 0.70     # NUEVO: posición específica para el subtítulo
-  use_plot_limits: true # usar límites del gráfico para el ancho
-
-# Configuración de títulos acotados al ancho del gráfico
-title:
-  text: ""
-  font:
-    family: "Nunito"
-    color: "#333333"
-  align: "center"       # NUEVO: alineación dentro del espacio disponible
-  wrap: true           # NUEVO: permitir múltiples líneas si es necesario
-
-subtitle:
-  text: ""
-  font:
-    family: "Nunito"
-    color: "#666666"
-  align: "center"      # NUEVO: alineación dentro del espacio disponible
-  wrap: true          # NUEVO: permitir múltiples líneas si es necesario
-
-# Configuración del autosize (solo tamaños)
+# Configuración de autoajuste
 autosize:
   enabled: true
-  mode: "rows"
-  width_in: 14
-  height_per_row: 1.8
-  min_height: 20
-  max_height: 24
+  height_per_row: 0.18
+  min_height: 5
+  max_height: 8
 
-# Ajustes de las barras
+# Ordenar datos
+sort_by_total: true  # Ordenar de mayor a menor por valor total
+
+# Título y subtítulo - Configuración básica
+title: ""
+subtitle: ""
+title_font_size: 28          # Tamaño base para el título
+title_font_weight: "bold"    # Negrita para mejor visibilidad
+title_color: "#333333"
+title_font_family: "Nunito"  
+title_font_style: "normal"
+title_x_position: 0.5        # Centrado horizontalmente
+title_horizontal_alignment: "center"  # Opciones: left, center, right
+title_vertical_alignment: "top"       # Siempre usar 'top' para posicionamiento coherente
+
+subtitle_font_size: 20       # Tamaño base para el subtítulo
+subtitle_color: "#666666"
+subtitle_font_family: "Nunito"  
+subtitle_font_style: "italic"   # Itálica para diferenciar del título
+subtitle_x_position: 0.5
+subtitle_horizontal_alignment: "center"
+subtitle_vertical_alignment: "top"  # Siempre usar 'top' para posicionamiento coherente
+
+# Configuración avanzada del título (tiene precedencia sobre los valores básicos)
+title_config:
+  x: 0.5
+  ha: "center"
+  fontsize: 28              # Tamaño del título (en puntos)
+  fontweight: "bold"        # Negrita
+  color: "#333333"          # Color del texto
+  style: "normal"           # Estilo normal
+  linespacing: 1.2
+  # bbox:
+  #   boxstyle: "round,pad=0.5"
+  #   facecolor: "#f8f8f8"
+  #   edgecolor: "#dddddd"
+  #   alpha: 0.8
+
+# Configuración avanzada del subtítulo (tiene precedencia sobre los valores básicos)
+subtitle_config:
+  x: 0.5
+  ha: "center"
+  fontsize: 20              # Tamaño del subtítulo (en puntos)
+  color: "#666666"          # Color del texto
+  style: "italic"           # Estilo itálica para distinguir del título
+  linespacing: 1
+
+# Configuración de barras
 bar:
-  width: 0.90
-  linewidth: 0.1
+  height: 0.95
   edgecolor: "white"
-  gap: 0.1
+  linewidth: 0.1
+  gap: 0.02                # Espacio entre barras (fracción de la altura de la barra)
 
-# Leyenda (únicamente estilos)
-legend: true
-legend_loc: "center right"
-legend_font:
-  family: "Nunito"
-  size: 22
-  weight: "normal"
-  color: "#333333"
-  alpha: 1.0
+# Colores para las series
+colors:
+  oro: "#E5B13A"
+  plata: "#A8A9AD"
+  bronce: "#CD7F32"
 
-# Etiquetas por segmento
-value_labels:
-  enabled: true
-  location: "center"
-  x_offset: 0
-  y_offset: 0
-  min_height: 3.0
-  font:
-    size: 12
-    family: "Nunito"
-    weight: "normal"
-    color: "#FFF"
-    alpha: 1.0
+# Etiquetas dentro de las barras
+value_labels: true
+value_format: "{:.0f}"
 
-# Etiquetas de total
+# Etiquetas de totales
 total_labels:
   enabled: true
-  location: "outside"
   x_offset: 4
-  font:
-    size: 12
-    family: "DejaVu Sans"
-    weight: "bold"
-    color: "#000000"
-    alpha: 1.0
-
-# Branding
-branding:
-  separator: false
-  separator_color: "0.85"
-  separator_alpha: 1.0
-  separator_width: 0.6
-  separator_y: 0.15
-  pad: 0.035
-  text_y: 0.05
-  icons_y: 0.12
-  logo_y: 0.12
-  fontsize: 12
-  color: "0.25"
-  alpha: 0.95
-  font_family: "Nunito"
-  font_weight: "normal"
-  text_separator: " · "
-  icons_zoom: 0.050
-  icons_gap: 0.055
-  icons_alpha: 0.95
-  logo_side: "right"
-  logo_width: 0.06
-  logo_alpha: 0.95
-  layout:
-    align: "center"
+  font_size: 12
+  font_weight: "bold"
 
 # Configuración del eje Y
 yaxis:
+  show_ticks: true       # Mostrar los valores numéricos del eje Y (true por defecto)
+  show_labels: true      # Mostrar las etiquetas de texto del eje Y (true por defecto)
   font:
-    family: "Nunito"
-    size: 14
-    weight: "normal"
+    size: 10
     color: "#333333"
-  ticks:
-    size: 2
-    pad: 5
-    direction: "out"
-  spines:
-    visible: false
-  grid:
-    enabled: false
 
-# Configuración del eje X
+# Configuración del eje X - por defecto oculto para gráficos de barras horizontales
 xaxis:
-  visible: false
-  spines:
-    visible: false
-  font:
-    family: "DejaVu Sans"
-    size: 16
-    weight: "normal"
-    color: "#333333"
+  show_ticks: false       # Ocultar los valores numéricos del eje X
+  show_labels: false      # Ocultar las etiquetas de texto del eje X
+  hide_axis: true         # Ocultar completamente la línea del eje X y todos los elementos
+  hide_spines: true       # Ocultar los bordes del eje X
 
-# Configuración del eje roto
-break_axis:
-  enabled: true
-  threshold: 6
-  fraction: 0.1
-
-# Configuración del eje X
-axis:
-  x:
-    extra_space: 0.10
-
-# Configuración de banderas
+# Banderas junto a nombres de países
 flags:
   enabled: true
-  column: "flag_url"
-  category_col: "pais"
-  place: "end"
-  zoom: 0.07
-  x_offset: 22
-  y_offset: 0
-  cache_dir: "assets/flags"
+  debug: true
+  show_axis_labels: true  # Mostrar nombres de países en el eje Y
+  pattern: "assets/flags/{CODE}.png"
+  code_column: "code"
+
+# Configuración de leyenda básica (modo simple)
+legend: true
+legend_loc: "lower right"  # Mantenido por compatibilidad con configuraciones antiguas
+
+# Configuración avanzada de leyenda
+legend_config:
+  # POSICIONAMIENTO DE LA LEYENDA
+  loc: "lower right"      # Posición general: qué esquina/borde de la leyenda se ancla a las coordenadas
+  bbox_to_anchor: [0.98, 0.02]  # Coordenadas precisas [x, y] donde se ancla la leyenda (x=0.98→derecha, y=0.02→abajo)
+  ncol: 3                 # Número de columnas para organizar los elementos de la leyenda
+  
+  # Tipografía y aspecto general
+  fontsize: 20            # Tamaño de fuente para las etiquetas
+  frameon: true           # Mostrar borde alrededor de la leyenda
+  title: "Leyenda"        # Título para la leyenda (sobrescrito por configuraciones específicas)
+  title_fontsize: 22      # Tamaño de fuente para el título
+  title_fontweight: "bold"  # Peso de la fuente para el título
+  
+  # Propiedades de espaciado
+  borderpad: 0.6          # Padding entre el contenido y el borde
+  labelspacing: 0.7       # Espacio vertical entre etiquetas
+  handlelength: 2.5       # Longitud de los marcadores
+  handleheight: 1.0       # Altura de los marcadores
+  handletextpad: 1.0      # Espacio entre marcador y texto
+  borderaxespad: 0.7      # Padding entre la leyenda y los ejes
+  columnspacing: 2.0      # Espacio entre columnas
+  
+  # APARIENCIA DE LA CAJA DE LEYENDA
+  facecolor: "#ffffff"   # Color de fondo de la leyenda
+  edgecolor: "#dddddd"   # Color del borde de la leyenda
+  framealpha: 0.9        # Transparencia del fondo (0-1)
+  shadow: false          # Sombra para la leyenda
+  fancybox: true         # Bordes redondeados
+  
+  # CONFIGURACIÓN ESPECÍFICA DE FUENTE
+  font:
+    color: "#333333"     # Color del texto
+    family: "Nunito"     # Familia de fuente
+    style: "normal"      # Estilo: normal, italic
+    weight: "normal"     # Peso: normal, bold
+    
+  # CONFIGURACIÓN DE LOS MARCADORES
+  markers:
+    edgewidth: 1.2       # Ancho del borde de los marcadores
+    alpha: 1.0           # Transparencia de los marcadores
+    scale: 1.5           # Factor de escala para los marcadores
+    
+  # Nota: Para un posicionamiento preciso, usar 'loc' + 'bbox_to_anchor'.
+  # Consultar docs/LEGEND_CUSTOMIZATION.md para ver ejemplos y explicaciones detalladas.
+
+# Grid
+grid: true
+
+# Footer
+footer:
+  # Configuración general del footer
+  config:
+    y_position: 0.03       # Posición vertical del footer
+    spacing: 0.02          # Espaciado entre elementos
+    show_frame: true      # Mostrar un marco para el footer
+    frame_padding: 0.01    # Relleno interno del marco
+    frame_alpha: 0.08      # Transparencia del marco
+    frame_color: "#f0f0f0" # Color del marco
+
+  # Texto de fuente (compatibilidad con versión antigua)
+  source: "Fuente de datos: "
+  source_fontsize: 9       # Se mantiene para compatibilidad
+  source_color: "#666666"  # Se mantiene para compatibilidad
+  
+  # Configuración avanzada del texto de fuente
+  source_config:
+    fontsize: 9
+    color: "#666666"
+    style: "italic"
+    weight: "normal"
+    family: "Nunito"
+    x_position: 0.15
+
+  # Texto de nota/licencia (compatibilidad con versión antigua)
+  note: ""
+  note_fontsize: 9         # Se mantiene para compatibilidad
+  note_color: "#666666"    # Se mantiene para compatibilidad
+  
+  # Configuración avanzada de la nota
+  note_config:
+    fontsize: 9
+    color: "#666666"
+    style: "normal"
+    weight: "normal"
+    family: "Nunito"
+    x_position: 0.5
+    alignment: "center"
+
+  # Logo único (compatibilidad con versión antigua)
+  logo: ""                 # Se mantiene para compatibilidad
+  logo_zoom: 0.50          # Se mantiene para compatibilidad
+
+  # Soporte para múltiples logos
+  logos:
+    - path: ""             # Ruta al archivo de imagen del logo
+      zoom: 0.15           # Factor de zoom del logo
+      x_position: 0.85     # Posición horizontal
+      alignment: "right"   # Alineación ("right", "left", "center")

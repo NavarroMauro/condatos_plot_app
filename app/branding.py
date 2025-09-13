@@ -2,6 +2,8 @@ from __future__ import annotations
 from pathlib import Path
 from datetime import date
 from typing import Mapping, Any
+import matplotlib.pyplot as plt
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 
 def add_branding(fig, params: Mapping[str, Any] | None = None):
     """
@@ -30,24 +32,24 @@ def add_branding(fig, params: Mapping[str, Any] | None = None):
     separator = b.get("text_separator", " · ")
 
     # Línea separadora
-    sep = bool(b.get("separator", False))  # Por defecto False según el YAML
+    sep = bool(b.get("separator", False))
     sep_color = b.get("separator_color", "0.85")
     sep_alpha = float(b.get("separator_alpha", 1.0))
     sep_width = float(b.get("separator_width", 0.6))
-    sep_y = float(b.get("separator_y", 0.15))
+    sep_y = margin_bottom * float(b.get("separator_y", 0.75))
     pad = float(b.get("pad", 0.035))
 
     # Estética
-    fontsize = float(b.get("fontsize", 12))  # Ajustado al valor del YAML
+    fontsize = float(b.get("fontsize", 12))
     color = b.get("color", "0.25")
     alpha = float(b.get("alpha", 0.95))
     font_family = b.get("font_family", "DejaVu Sans")
     font_weight = b.get("font_weight", "normal")
 
-    # Posiciones Y
-    text_y = float(b.get("text_y", 0.05))  # Valores exactos del YAML
-    icons_y = float(b.get("icons_y", 0.12))
-    logo_y = float(b.get("logo_y", 0.12))
+    # Posiciones Y (adjust these to be relative to margin_bottom)
+    text_y = margin_bottom * float(b.get("text_y", 0.25))
+    icons_y = margin_bottom * float(b.get("icons_y", 0.60))
+    logo_y = margin_bottom * float(b.get("logo_y", 0.60))
 
     # --------- Setup de footer ---------
     import matplotlib.pyplot as plt
@@ -77,63 +79,35 @@ def add_branding(fig, params: Mapping[str, Any] | None = None):
     if date_auto: bits.append(date.today().strftime(date_fmt))
     footer_text = separator.join(bits)
 
-    # Calcular espacio disponible
-    available_width = 1.0 - margin_left - margin_right
-    
-    # --------- Logo (procesar primero para saber espacio) ---------
-    logo_width = float(b.get("logo_width", 0.06))  # Actualizado al valor del YAML
+    # --------- Calcular dimensiones totales ---------
+    logo_width = float(b.get("logo_width", 0.06))
     logo_path = Path(b.get("logo", "")).expanduser()
-    logo_side = b.get("logo_side", "right")
     logo_alpha = float(b.get("logo_alpha", 0.95))
     
-    if logo_path.exists():
-        available_width -= logo_width
-        try:
-            im = plt.imread(str(logo_path))
-            fig_w_in = fig.get_figwidth()
-            dpi = fig.get_dpi()
-            target_px = max(1.0, logo_width * fig_w_in * dpi)
-            zoom = max(0.01, target_px / im.shape[1])
-
-            # Posición ajustada del logo
-            if logo_side == "right":
-                x_logo = 0.98  # Posición fija cerca del borde derecho
-                align = (1, 0.5)  # Alinear por el borde derecho
-            else:
-                x_logo = margin_left
-                align = (0, 0.5)
-
-            ab = AnnotationBbox(
-                OffsetImage(im, zoom=zoom, alpha=logo_alpha),
-                (x_logo, logo_y),
-                xycoords="figure fraction",
-                frameon=False,
-                box_alignment=align,
-                pad=0.0
-            )
-            ab.set_zorder(11)
-            ab.set_clip_on(False)
-            fig.add_artist(ab)
-        except Exception:
-            pass
-
-    # --------- Iconos centrados ---------
     icons = [Path(p).expanduser() for p in b.get("icons", [])]
-    icons_zoom = float(b.get("icons_zoom", 0.020))  # Valor del YAML
-    icons_gap = float(b.get("icons_gap", 0.055))    # Valor del YAML
-    icons_alpha = float(b.get("icons_alpha", 0.95))  # Valor del YAML
-
+    icons_zoom = float(b.get("icons_zoom", 0.020))
+    icons_gap = float(b.get("icons_gap", 0.055))
+    icons_alpha = float(b.get("icons_alpha", 0.95))
+    
+    # Calcular ancho total del conjunto
+    icons_width = 0
     if icons:
-        # Calcular centro efectivo (ajustar si hay logo)
-        if logo_path.exists() and logo_side == "right":
-            center_x = 0.5 - (logo_width / 2)
-        else:
-            center_x = 0.5
-
-        # Calcular ancho total del grupo de iconos
-        total_width = icons_gap * (len(icons) - 1)
-        start_x = center_x - (total_width / 2)
-
+        # Ancho de cada ícono
+        icon_width = icons_zoom * fig.get_figwidth() * fig.get_dpi() / fig.get_dpi()
+        # Ancho total = (ancho de cada ícono * número de íconos) + (espacio entre íconos * (número de íconos - 1))
+        icons_width = (icon_width * len(icons)) + (icons_gap * (len(icons) - 1))
+    
+    # Ancho total del grupo incluyendo logo y espacio entre logo e iconos
+    total_group_width = icons_width + logo_width + icons_gap  # icons_gap como espacio entre iconos y logo
+    
+    # Centro de la figura
+    center_x = 0.5
+    
+    # Posición inicial para los iconos (centrado del grupo completo)
+    start_x = center_x - (total_group_width / 2)
+    
+    # --------- Dibujar iconos CC ---------
+    if icons:
         for i, icon in enumerate(icons):
             if not icon.exists():
                 continue
@@ -154,14 +128,37 @@ def add_branding(fig, params: Mapping[str, Any] | None = None):
                 fig.add_artist(ab)
             except Exception:
                 continue
+    
+    # --------- Logo ---------
+    if logo_path.exists():
+        try:
+            im = plt.imread(str(logo_path))
+            fig_w_in = fig.get_figwidth()
+            dpi = fig.get_dpi()
+            target_px = max(1.0, logo_width * fig_w_in * dpi)
+            zoom = max(0.01, target_px / im.shape[1])
+
+            # Posicionar logo después de los iconos
+            x_logo = start_x + icons_width + icons_gap
+            
+            ab = AnnotationBbox(
+                OffsetImage(im, zoom=zoom, alpha=logo_alpha),
+                (x_logo, logo_y),
+                xycoords="figure fraction",
+                frameon=False,
+                box_alignment=(0, 0.5),  # Alinear a la izquierda
+                pad=0.0
+            )
+            ab.set_zorder(11)
+            ab.set_clip_on(False)
+            fig.add_artist(ab)
+        except Exception:
+            pass
 
     # --------- Texto centrado ---------
     if footer_text:
-        # Usar el mismo centro efectivo que los iconos
-        text_x = center_x if 'center_x' in locals() else 0.5
-        
         fig.text(
-            text_x,
+            center_x,  # Usar el centro exacto de la figura
             text_y,
             footer_text,
             ha="center",

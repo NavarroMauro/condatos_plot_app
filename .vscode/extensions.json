@@ -1,5 +1,10 @@
 {
-    "recommendations": [
-        "kevinrose.vsc-python-indent"
-    ]
+  "recommendations": [
+    "github.copilot-chat",
+    "github.copilot",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "ms-toolsai.jupyter"
+  ]
 }

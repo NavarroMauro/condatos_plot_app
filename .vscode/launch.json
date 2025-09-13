@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: stackedbarh",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app/plot.py",
+      "args": [
+        "stackedbarh",
+        "config/medallas-juegos-panamericanos-junior-2025-stacked-horizontal.yml"
+      ],
+      "console": "integratedTerminal",
+      "python": "~/miniconda3/envs/condatos-figs/bin/python",
+      "justMyCode": true
+    }
+  ]
+}

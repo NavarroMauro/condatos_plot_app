@@ -1,0 +1,63 @@
+# Estilo Colorido y Vibrante
+# Un estilo vivo con colores saturados para visualizaciones impactantes
+
+# Figura y colores
+figure.facecolor: '#f8f9fa'
+axes.facecolor: '#f8f9fa'
+axes.edgecolor: '#333333'
+axes.labelcolor: '#333333'
+axes.prop_cycle: cycler('color', ['#FF6B6B', '#4ECDC4', '#FFE66D', '#1A535C', '#FF9F1C', '#7B68EE', '#2EC4B6', '#E71D36', '#3BCEAC', '#CD5334'])
+
+# Tipografía - más llamativa
+font.family: sans-serif
+font.sans-serif: Nunito, Arial, Helvetica
+font.weight: bold
+font.size: 12
+
+# Ejes - estilo más marcado
+axes.titlesize: 18
+axes.labelsize: 14
+axes.linewidth: 1.5
+axes.spines.top: False
+axes.spines.right: False
+axes.spines.left: True
+axes.spines.bottom: True
+axes.grid: True
+axes.titlelocation: center
+axes.labelpad: 8
+
+# Ticks - más llamativos
+xtick.direction: in
+ytick.direction: in
+xtick.major.width: 1.2
+ytick.major.width: 1.2
+xtick.color: '#333333'
+ytick.color: '#333333'
+xtick.labelsize: 11
+ytick.labelsize: 11
+xtick.major.size: 6
+ytick.major.size: 6
+
+# Elementos
+lines.linewidth: 3.0
+patch.linewidth: 0.8
+patch.edgecolor: '#FFFFFF'
+
+# Leyenda
+legend.frameon: True
+legend.fontsize: 12
+legend.facecolor: 'white'
+legend.edgecolor: '#DDDDDD'
+legend.framealpha: 0.9
+legend.shadow: True
+legend.fancybox: True
+
+# Rejilla
+grid.linestyle: -
+grid.linewidth: 0.8
+grid.alpha: 0.3
+grid.color: '#CCCCCC'
+
+# Ajustes para barras
+hatch.color: white
+hatch.linewidth: 1.0

@@ -1,6 +1,6 @@
 # app/plot_helpers.py
 from __future__ import annotations
-
+from typing import Mapping, Any
 from pathlib import Path
 import hashlib, io
 import numpy as np
@@ -9,6 +9,8 @@ import matplotlib.image as mpimg
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from matplotlib.axes import Axes
 from PIL import Image
+from .branding import add_branding
+from .io_utils import save_fig_multi
 
 # =============================
 # IO / utilidades de imágenes
@@ -90,44 +92,47 @@ def _flags_iter(df, cat_col: str, flag_col: str, pattern: str | None):
 
 def autosize_figure(fig, params: dict, *, n_rows: int) -> None:
     """
-    Ajusta el tamaño de la figura EN FUNCIÓN DE LAS FILAS y escribe los valores
-    calculados en params['width_in'] y params['height_in'].
-    No hace nada si autosize.enabled es False o falta config.
+    Ajusta el tamaño de la figura manteniendo alturas fijas para header/footer.
     """
-    a = (params.get("autosize") or {})
+    a = params.get("autosize", {})
     if not a or not a.get("enabled", False):
         return
 
-    mode = str(a.get("mode", "rows")).lower()
-    if mode != "rows":
-        return  # ahora solo soportamos modo por filas
-
-    # lee parámetros con defaults sensatos
-    width_in       = float(a.get("width_in", 12.0))
-    h_per_row      = float(a.get("height_per_row", 0.28))
-    min_height_in  = float(a.get("min_height", 6.0))
-    max_height_in  = float(a.get("max_height", 18.0))
-
-    # calcula altura base para las filas
-    height_in = h_per_row * float(n_rows)
+    # Configuración de anchura
+    width_in = float(a.get("width_in", 12.0))
     
-    # Añade espacio para títulos si existen
-    if params.get("title") or params.get("subtitle"):
-        title_height = float(a.get("title_height", 2.0))  # 2 pulgadas por defecto para títulos
-        height_in += title_height
-
-    # aplica límites min/max
-    height_in = max(min_height_in, min(max_height_in, height_in))
-
-    # escribe en params para que las siguientes funciones respeten esto
-    params["width_in"]  = width_in
+    # Alturas fijas para header y footer (en pulgadas)
+    header_height_in = float(a.get("header_height_in", 1.5))
+    footer_height_in = float(a.get("footer_height_in", 1.0))
+    
+    # Altura para el contenido principal (body)
+    h_per_row = float(a.get("height_per_row", 0.25))  # Reducido de 0.3 a 0.25
+    body_height_in = h_per_row * n_rows
+    
+    # 4. Establecer límites para el body solamente
+    min_body_height = float(a.get("min_body_height", 6.0))
+    max_body_height = float(a.get("max_body_height", 12.0))
+    body_height_in = max(min_body_height, min(max_body_height, body_height_in))
+    
+    # 5. Calcular altura total de la figura
+    height_in = header_height_in + body_height_in + footer_height_in
+    
+    # 6. Actualizar parámetros
+    params["width_in"] = width_in
     params["height_in"] = height_in
-
-    # aplica al objeto figura actual
-    try:
+    
+    # 7. Calcular proporciones para el layout
+    total_height = height_in
+    params["layout"] = params.get("layout", {})
+    params["layout"]["margin_top"] = header_height_in / total_height
+    params["layout"]["margin_bottom"] = footer_height_in / total_height
+    
+    # 8. Si hay una figura, actualizar sus dimensiones
+    if fig is not None:
         fig.set_size_inches(width_in, height_in, forward=True)
         
-        # Ajusta los márgenes para dar espacio a los títulos
+    # Ajusta los márgenes para dar espacio a los títulos
+    try:
         if params.get("title") or params.get("subtitle"):
             title_margin = float(a.get("title_margin", 0.15))  # 15% del espacio para títulos
             fig.subplots_adjust(top=1.0 - title_margin)
@@ -155,38 +160,6 @@ def autosize_for_rows(params: dict, n_rows: int):
     height_in = max(hmin, min(hmax, n_rows * hpr))
     return (width_in, height_in)
 
-
-def norm_legend_loc(loc: str) -> str:
-    """
-    Acepta ubicaciones “humanas” y las traduce a Matplotlib.
-    """
-    if not loc:
-        return "upper right"
-    m = {
-        "top left": "upper left",
-        "top right": "upper right",
-        "bottom left": "lower left",
-        "bottom right": "lower right",
-        "center left": "center left",
-        "center right": "center right",
-        "top center": "upper center",
-        "bottom center": "lower center",
-        "center": "center",
-    }
-    return m.get(loc.strip().lower(), loc)
-
-
-def get_label_fmt(params: dict, default: str = "{:.0f}"):
-    """
-    Devuelve el formato de etiquetas de valores.
-    Usa params['yfmt'] si existe, si no devuelve 'default'.
-    """
-    fmt = params.get("yfmt")
-    if isinstance(fmt, str) and fmt:
-        return fmt
-    return default
-
-# ...existing code...
 
 def draw_broken_axis_marks(ax: plt.Axes, x: float, y: float, width: float = 0.03, height: float = 0.015, angle: float = 45, color: str = "#333333") -> None:
     """
@@ -580,64 +553,17 @@ def get_bar_style(params: dict) -> dict:
     """
     bar_cfg = params.get("bar", {})
     return {
-        "height": float(bar_cfg.get("width", 0.65)),  # para barras horizontales, height controla el ancho
+        "height": float(bar_cfg.get("width", 0.85)),  # Aumentado a 0.85 para barras más altas
         "linewidth": float(bar_cfg.get("linewidth", 0.75)),
         "edgecolor": bar_cfg.get("edgecolor", "white")
     }
     
-
-def apply_layout(fig, ax, params: dict) -> None:
+def adjust_bar_spacing(ax) -> None:
     """
-    Aplica la estructura de tres secciones (header, body, footer) a la figura.
-    
-    Parameters
-    ----------
-    fig : matplotlib.figure.Figure
-        La figura a configurar
-    ax : matplotlib.axes.Axes
-        El eje principal que contiene el gráfico
-    params : dict
-        Diccionario de configuración con las opciones de layout
-        
-    La estructura se divide en:
-    - HEADER (30% superior): Título y subtítulo
-    - BODY (55% central): Gráfico principal
-    - FOOTER (15% inferior): Branding y fuente
+    Ajusta el espaciado entre barras al mínimo posible.
     """
-    # Configuración de márgenes
-    layout = params.get("layout", {})
-    
-    # Márgenes predeterminados - AJUSTADOS
-    margin_top = float(layout.get("margin_top", 0.30))     # 30% para header
-    margin_bottom = float(layout.get("margin_bottom", 0.15)) # 15% para footer
-    margin_left = float(layout.get("margin_left", 0.22))    # 22% margen izquierdo
-    margin_right = float(layout.get("margin_right", 0.12))  # 12% margen derecho
-
-    # 1. Ajustar el área del gráfico (BODY)
-    ax.set_position([
-        margin_left,                    # left
-        margin_bottom,                  # bottom
-        1.0 - margin_left - margin_right, # width
-        1.0 - margin_top - margin_bottom  # height
-    ])
-
-    # Guardar la configuración en params
-    params["_layout"] = {
-        "margins": {
-            "top": margin_top,
-            "bottom": margin_bottom,
-            "left": margin_left,
-            "right": margin_right
-        },
-        "content_width": 1.0 - margin_left - margin_right
-    }
-
-    # Dejar que layout.py maneje el header y footer
-    from .layout import apply_frame, finish_and_save
-    apply_frame(fig, params)
-    finish_and_save(fig, params)
-
-    fig.stale = True
+    # Solo ajustar el margen horizontal
+    ax.margins(x=0.02)
 
 
 def add_titles(fig, ax, params: dict) -> None:
@@ -691,3 +617,28 @@ def add_titles(fig, ax, params: dict) -> None:
                 color=subtitle_font.get("color", "#666666"))
 
     fig.stale = True
+
+def finish_and_save(fig, params: Mapping[str, Any]):
+    """Inserta branding estándar y guarda en todos los formatos."""
+    # 1. Configurar DPI para mejor calidad de exportación
+    dpi = float(params.get("dpi", 300))
+    fig.set_dpi(dpi)
+
+    # 2. Aplicar branding según configuración
+    branding_cfg = params.get("branding", {})
+    add_branding(fig, branding_cfg)
+
+    # 3. Guardar en múltiples formatos configurados
+    out = Path(params.get("outfile", "out/figure"))
+    save_fig_multi(
+        fig,
+        out,
+        formats=params.get("formats", ["png", "svg", "pdf"]),
+        jpg_quality=params.get("jpg_quality", 95),
+        webp_quality=params.get("webp_quality", 95),
+        avif_quality=params.get("avif_quality", 80),
+        scour_svg=params.get("scour_svg", True)
+    )
+
+    # 4. Limpiar recursos
+    fig.canvas.draw_idle()

@@ -24,7 +24,8 @@ def save_fig_multi(fig, base: Path, formats: Iterable[str],
             out = base.with_suffix(f".{fmt_lower}")
             ensure_parent(out)
             print(f"[save] {out}")
-            fig.savefig(out, bbox_inches='tight', pad_inches=0.1)  # Añadimos bbox_inches y padding
+            # Usar pad_inches=0.02 en lugar de 0.1 para reducir espacio
+            fig.savefig(out, bbox_inches=None, pad_inches=0.02)  # Añadimos bbox_inches y padding
             if fmt_lower == "svg" and scour_svg:
                 try:
                     minified = base.with_suffix(".min.svg")
@@ -37,8 +38,8 @@ def save_fig_multi(fig, base: Path, formats: Iterable[str],
                     pass
         elif fmt_lower in {"jpg","jpeg","webp","avif"}:
             tmp_png = base.with_suffix(".tmp.png")
-            print(f"[tmp] {tmp_png}")
-            fig.savefig(tmp_png, bbox_inches='tight', pad_inches=0.1)  # Aquí también
+            # Usar pad_inches=0.02 en lugar de 0.1 también aquí
+            fig.savefig(tmp_png, bbox_inches=None, pad_inches=0.02)  # Aquí también
             im = Image.open(tmp_png)
             out = base.with_suffix(f".{fmt_lower}")
             ensure_parent(out)

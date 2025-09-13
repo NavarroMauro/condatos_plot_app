@@ -1,0 +1,34 @@
+{
+  // Ejecutar comandos de make desde VS Code
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Lint (ruff)",
+      "type": "shell",
+      "command": "make lint",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Format (ruff)",
+      "type": "shell",
+      "command": "make fmt",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Smoke test",
+      "type": "shell",
+      "command": "make smoke",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Stackedbarh",
+      "type": "shell",
+      "command": "make stackedbarh",
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}

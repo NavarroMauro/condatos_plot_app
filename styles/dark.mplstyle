@@ -1,0 +1,58 @@
+# Estilo Oscuro/Nocturno
+# Un estilo con fondo oscuro y colores brillantes para contrastar
+
+# Colores base
+figure.facecolor: '#1e1e1e'
+axes.facecolor: '#1e1e1e'
+axes.edgecolor: '#BBBBBB'
+axes.labelcolor: '#FFFFFF'
+axes.prop_cycle: cycler('color', ['#61afef', '#e06c75', '#98c379', '#c678dd', '#56b6c2', '#e5c07b', '#be5046', '#d19a66', '#528bff', '#abb2bf'])
+
+# Tipografía - colores claros para fondo oscuro
+font.family: sans-serif
+font.sans-serif: Nunito, Arial, Helvetica
+font.weight: normal
+font.size: 12
+text.color: '#FFFFFF'
+
+# Ejes - líneas más visibles en fondo oscuro
+axes.titlesize: 16
+axes.labelsize: 13
+axes.linewidth: 1.0
+axes.spines.top: False
+axes.spines.right: False
+axes.spines.left: True
+axes.spines.bottom: True
+axes.grid: True
+axes.titlelocation: center
+
+# Ticks - más visibles en fondo oscuro
+xtick.direction: out
+ytick.direction: out
+xtick.major.width: 1.0
+ytick.major.width: 1.0
+xtick.color: '#AAAAAA'
+ytick.color: '#AAAAAA'
+xtick.labelsize: 10
+ytick.labelsize: 10
+
+# Elementos y líneas
+lines.linewidth: 2.5
+patch.linewidth: 0.5
+patch.edgecolor: '#333333'
+
+# Leyenda
+legend.frameon: True
+legend.fontsize: 10
+legend.facecolor: '#2d2d2d'
+legend.edgecolor: '#555555'
+
+# Rejilla
+grid.linestyle: --
+grid.linewidth: 0.5
+grid.alpha: 0.4
+grid.color: '#555555'
+
+# Ajustes para barras
+hatch.color: '#333333'
+hatch.linewidth: 0.8
