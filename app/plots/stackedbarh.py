@@ -3,40 +3,14 @@ import typer
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
-import yaml
 
-class SimpleBarChart:
-    def __init__(self, params, df):
-        self.params = params
-        self.df = df
-        self.register_custom_fonts()
-        self.prepare_data()
-        self.setup_dimensions()
-        
-    def register_custom_fonts(self):
-        """Registra fuentes personalizadas para usar en el gráfico."""
-        fonts_dir = Path("fonts")
-        if fonts_dir.exists():
-            # Buscar todas las fuentes Nunito disponibles
-            nunito_fonts = list(fonts_dir.glob("Nunito-*.ttf"))
-            nunito_variable_fonts = list(fonts_dir.glob("Nunito-*VariableFont*.ttf"))
-            
-            # Registrar todas las fuentes encontradas
-            for font_path in nunito_fonts:
-                try:
-                    fm.fontManager.addfont(str(font_path))
-                    print(f"✅ Fuente registrada: {font_path.name}")
-                except Exception as e:
-                    print(f"❌ Error al registrar fuente {font_path.name}: {e}")
-                    
-            # Verificar si Nunito está disponible después de registrar
-            font_names = [f.name for f in fm.fontManager.ttflist]
-            if any('Nunito' in name for name in font_names):
-                print("✅ Fuente Nunito disponible para usar en los gráficos")
-            else:
-                print("⚠️ Fuente Nunito no se pudo registrar correctamente")
-        
+from app.plots.base_chart import BaseChart
+
+class StackedHorizontalBarChart(BaseChart):
+    """
+    Clase para gráficos de barras horizontales apiladas.
+    Hereda de BaseChart e implementa los métodos específicos para este tipo de gráfico.
+    """
     def setup_dimensions(self):
         """Configura las dimensiones del gráfico basado en el contenido."""
         autosize = self.params.get("autosize", {})
@@ -88,7 +62,7 @@ class SimpleBarChart:
         # Preparar matriz de datos
         self.M = np.vstack([self.df[c].astype(float).to_numpy() for c in self.cols])
         
-        # Calcular totales por país para ordenamiento
+        # Calcular totales por categoría para ordenamiento
         self.totals = self.M.sum(axis=0)
         
         # Ordenar datos según total
@@ -110,7 +84,7 @@ class SimpleBarChart:
             self.cats = [self.df[self.cat_col].astype(str).tolist()[i] for i in sorted_indices]
             
             # Imprimir información de depuración sobre las categorías
-            print(f"📊 Primeros 5 nombres de países después de ordenar:")
+            print("📊 Primeros 5 nombres de países después de ordenar:")
             for i, cat in enumerate(self.cats[:5]):
                 print(f"  - {i+1}: {cat}")
             
@@ -144,20 +118,10 @@ class SimpleBarChart:
         return cols
     
     def create_figure(self):
-        width_in = float(self.params.get("width_in", 12))
-        height_in = float(self.params.get("height_in", 8))
-        self.fig = plt.figure(figsize=(width_in, height_in))
+        """Crea la figura con las dimensiones adecuadas y configura los ejes."""
+        super().create_figure()  # Llama al método de la clase base
         
-        # Header: Aumentamos significativamente la altura para dar más espacio al título y subtítulo
-        # El valor por defecto es 0.15, pero lo aumentamos a 0.25 para asegurar suficiente espacio
-        header_height = float(self.params.get("margins", {}).get("top", 0.25))
-        print(f"Altura del header: {header_height * 100:.1f}% de la altura total")
-        
-        # Eje para el header (título)
-        self.ax_header = self.fig.add_axes([0, 1-header_height, 1, header_height], frameon=False)
-        self.ax_header.set_axis_off()
-        
-        # Obtener configuración de márgenes del YAML
+        # Configuración adicional específica para barras horizontales
         margins_config = self.params.get("margins", {})
         auto_adjust = margins_config.get("auto_adjust", True)  # Por defecto, ajuste automático
         margin_bottom = float(margins_config.get("bottom", 0.12))
@@ -171,6 +135,7 @@ class SimpleBarChart:
         # Margen izquierdo manual si se especifica
         manual_left_margin = margins_config.get("left", None)
         
+        # Manejo especial para el margen izquierdo en barras horizontales
         if auto_adjust and manual_left_margin is None:
             # Crear un eje temporal para calcular el ancho exacto de los textos
             temp_fig = plt.figure(figsize=(1, 1))
@@ -195,6 +160,7 @@ class SimpleBarChart:
             plt.close(temp_fig)  # Cerramos la figura temporal
             
             # Convertir pulgadas a fracción de figura
+            width_in = float(self.params.get("width_in", 12))
             left_margin_inches = max_width + margin_text_padding  # Añadimos el padding configurado
             left_margin = left_margin_inches / width_in
             
@@ -210,13 +176,14 @@ class SimpleBarChart:
         
         # Calculamos el ancho disponible para el gráfico
         plot_width = 1.0 - left_margin - margin_right
-        
         print(f"Configuración final: Margen izquierdo = {left_margin:.2f}, Ancho gráfico = {plot_width:.2f}")
         
-        # Eje principal para el gráfico con los márgenes configurados
+        # Actualizar el eje principal con los márgenes calculados
+        header_height = float(self.params.get("margins", {}).get("top", 0.25))
+        self.ax.remove()  # Eliminamos el eje creado por la clase base
         self.ax = self.fig.add_axes([left_margin, margin_bottom, plot_width, 1.0-margin_bottom-header_height])
         
-    def draw_bars(self):
+    def draw_chart(self):
         """Dibuja las barras apiladas horizontales."""
         # Obtener configuración de barras
         bar_config = self.params.get("bar", {})
@@ -226,7 +193,7 @@ class SimpleBarChart:
         bar_gap = float(bar_config.get("gap", 0.0))  # Espacio entre barras como fracción de altura
         
         # Imprimir la configuración para depuración
-        print(f"📊 Configuración de barras:")
+        print("📊 Configuración de barras:")
         print(f"  - Altura: {bar_height:.2f}")
         print(f"  - Espacio entre barras: {bar_gap:.2f}")
         print(f"  - Color del borde: {bar_edgecolor}")
@@ -269,14 +236,25 @@ class SimpleBarChart:
             
             # Añadir etiquetas de valores en las barras
             if bool(self.params.get("value_labels", False)):
+                # Obtener configuración de etiquetas de valores
+                value_labels_config = self.params.get("value_labels_config", {}) if isinstance(self.params.get("value_labels"), bool) else self.params.get("value_labels", {})
+                
+                # Obtener tamaño de fuente y formato
+                font_size = float(value_labels_config.get("font_size", 9))
+                font_weight = value_labels_config.get("font_weight", "normal")
+                fmt = self.params.get("value_format", "{:.0f}")
+                
+                # Imprimir información de configuración para depuración
+                print("📊 Configuración de etiquetas de valores:")
+                print(f"  - Tamaño de fuente: {font_size}")
+                print(f"  - Peso de fuente: {font_weight}")
+                print(f"  - Formato: {fmt}")
+                
                 for j, val in enumerate(vals):
                     if val > 0:  # Solo mostrar valores positivos
                         # Calcular posición central para la etiqueta
                         x_pos = self.bottoms[j] + val/2
                         y_pos = self.y_positions[j]
-                        
-                        # Determinar formato
-                        fmt = self.params.get("value_format", "{:.0f}")
                         
                         # Determinar color del texto (contraste)
                         text_color = "white" if val > 5 else "black"
@@ -286,32 +264,28 @@ class SimpleBarChart:
                             fmt.format(val),
                             ha='center', va='center',
                             color=text_color,
-                            fontsize=9
+                            fontsize=font_size,
+                            fontweight=font_weight
                         )
             
             # Actualizar las posiciones para la próxima serie
             self.bottoms += vals
-        
-        # Comprobar si las banderas estarán al final de las barras, y si es así, ajustar el límite del eje X
-        flags_config = self.params.get("flags", {})
-        if flags_config.get("enabled", False) and flags_config.get("position", "") == "end":
-            # Aumentar el margen derecho para dar espacio a las banderas al final de las barras
-            max_bottom = self.bottoms.max()
-            self.ax.set_xlim(0, max_bottom * 1.15)  # 15% de margen a la derecha para banderas
 
     def configure_axes(self):
         """Configura los ejes y sus elementos."""
+        # Verificar si hay banderas habilitadas para usar el método apropiado
+        flags_config = self.params.get("flags", {})
+        if flags_config.get("enabled", False):
+            # Si hay banderas habilitadas, usar el método específico
+            self.configure_axes_with_flags()
+            return
+        
+        # Si no hay banderas, usar la configuración básica
         # Ajustar límites con padding
         self.ax.set_ylim(-0.5, len(self.cats) - 0.5)
         
-        # Verificar si necesitamos un margen extra para banderas al final
-        flags_config = self.params.get("flags", {})
-        if flags_config.get("enabled", False) and flags_config.get("position", "") == "end":
-            # Margen extra para banderas al final
-            self.ax.set_xlim(0, self.bottoms.max() * 1.15)  # 15% de margen a la derecha
-        else:
-            # Margen estándar
-            self.ax.set_xlim(0, self.bottoms.max() * 1.05)  # 5% de margen a la derecha
+        # Margen estándar
+        self.ax.set_xlim(0, self.bottoms.max() * 1.05)  # 5% de margen a la derecha
         
         # Configurar eje Y según configuración
         yaxis_config = self.params.get("yaxis", {})
@@ -320,14 +294,14 @@ class SimpleBarChart:
         self.ax.set_yticks(self.y_positions)
         
         # Verificar si se deben ocultar las etiquetas del eje Y
-        if yaxis_config.get("show_labels", True) == False:
+        if not yaxis_config.get("show_labels", True):
             self.ax.set_yticklabels([])
             print("🙈 Etiquetas del eje Y ocultas por configuración")
         else:
             self.ax.set_yticklabels(self.cats)
         
         # Verificar si se deben ocultar los ticks del eje Y
-        if yaxis_config.get("show_ticks", True) == False:
+        if not yaxis_config.get("show_ticks", True):
             self.ax.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
             print("🙈 Ticks del eje Y ocultos por configuración")
             
@@ -335,12 +309,12 @@ class SimpleBarChart:
         spines_to_hide = ["top", "right"]
         
         # Si estamos ocultando ticks del eje Y, también ocultamos la línea del spine
-        if yaxis_config.get("show_ticks", True) == False:
+        if not yaxis_config.get("show_ticks", True):
             spines_to_hide.append("left")
         
         # Verificar si se debe ocultar el eje X
         xaxis_config = self.params.get("xaxis", {})
-        if xaxis_config.get("show_ticks", True) == False or xaxis_config.get("hide_axis", False):
+        if not xaxis_config.get("show_ticks", True) or xaxis_config.get("hide_axis", False):
             # Ocultar las etiquetas del eje X
             self.ax.xaxis.set_ticklabels([])
             spines_to_hide.append("bottom")
@@ -395,12 +369,12 @@ class SimpleBarChart:
         
         # IMPORTANTE: La configuración de show_labels en yaxis tiene prioridad sobre todo
         if "show_labels" in yaxis_config:
-            if yaxis_config["show_labels"] == False:
+            if not yaxis_config["show_labels"]:
                 self.ax.set_yticklabels([])
                 print("🙈 Etiquetas del eje Y ocultas por configuración de yaxis.show_labels=false")
             else:
                 self.ax.set_yticklabels(self.cats)
-                print(f"✅ Etiquetas del eje Y mostradas por configuración de yaxis.show_labels=true")
+                print("✅ Etiquetas del eje Y mostradas por configuración de yaxis.show_labels=true")
                 # Información de depuración sobre las etiquetas
                 for i, cat in enumerate(self.cats[:5]):
                     print(f"  - {i+1}: {cat}")
@@ -408,7 +382,7 @@ class SimpleBarChart:
             # Si no hay configuración específica de yaxis.show_labels, usar la de flags
             if flags_config.get("show_axis_labels", True):
                 self.ax.set_yticklabels(self.cats)
-                print(f"🔤 Etiquetas establecidas en el eje Y (por flags.show_axis_labels):")
+                print("🔤 Etiquetas establecidas en el eje Y (por flags.show_axis_labels):")
                 for i, cat in enumerate(self.cats[:5]):
                     print(f"  - {i+1}: {cat}")
             else:
@@ -416,7 +390,7 @@ class SimpleBarChart:
                 print("🔤 Etiquetas ocultas por configuración de flags.show_axis_labels=false")
         
         # Verificar si debemos ocultar los ticks del eje Y
-        if yaxis_config.get("show_ticks", True) == False:
+        if not yaxis_config.get("show_ticks", True):
             # Ocultamos las marcas de tick pero mantenemos las etiquetas si show_labels es true
             if yaxis_config.get("show_labels", True):
                 self.ax.tick_params(axis='y', which='both', left=False, right=False, labelleft=True)
@@ -438,6 +412,14 @@ class SimpleBarChart:
         # Eliminar spines innecesarios
         for spine in ["top", "right", "bottom"]:
             self.ax.spines[spine].set_visible(False)
+            
+        # Forzar ocultación del eje X cuando está configurado
+        if self.params.get("xaxis", {}).get("hide_axis", False) or \
+           not self.params.get("xaxis", {}).get("visible", True):
+            self.ax.xaxis.set_ticklabels([])
+            self.ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+            self.ax.get_xaxis().set_visible(False)
+            print("🙈 Eje X ocultado forzosamente por la configuración xaxis.hide_axis o xaxis.visible=false")
         
         # Grid sutil (solo si no se oculta el eje X)
         if self.params.get("grid", True) and self.params.get("xaxis", {}).get("show_ticks", True):
@@ -527,138 +509,27 @@ class SimpleBarChart:
     
     def debug_flag_paths(self):
         """Muestra información de depuración sobre las rutas de las banderas."""
+        from app.debug_utils import debug_flag_paths
+        
         flags_config = self.params.get("flags", {})
-        if not flags_config.get("enabled", True):
-            print("⚠️ Las banderas no están habilitadas en la configuración.")
-            return
-            
-        flag_col = flags_config.get("column", "flag_url")
-        pattern = flags_config.get("pattern", "assets/flags/{CODE}.png")
-        code_col = flags_config.get("code_column", "code")
+        cat_col = self.params.get("data", {}).get("category_col", "")
         
-        has_code_col = code_col in self.df.columns
-        has_flag_col = flag_col in self.df.columns
-        
-        print(f"🔍 Depuración de rutas de banderas:")
-        print(f"- Columna de banderas '{flag_col}': {'✅ Presente' if has_flag_col else '❌ No encontrada'}")
-        print(f"- Columna de códigos '{code_col}': {'✅ Presente' if has_code_col else '❌ No encontrada'}")
-        print(f"- Patrón: {pattern}")
-        print(f"- Directorio actual: {Path.cwd()}")
-        
-        for i, cat in enumerate(self.cats):
-            flag_path = None
-            
-            # Intentar obtener del dataframe
-            if has_flag_col:
-                flag_path = self.df.iloc[i].get(flag_col, None)
-                print(f"  - {cat}: Valor en columna '{flag_col}': {flag_path}")
-            
-            # Intentar construir desde código
-            if has_code_col:
-                code = str(self.df.iloc[i].get(code_col, "")).strip()
-                constructed_path = pattern.format(code=code.lower(), CODE=code.upper())
-                print(f"  - {cat}: Código '{code}' → Ruta: {constructed_path}")
-                
-                if Path(constructed_path).exists():
-                    print(f"    ✅ Archivo existe")
-                else:
-                    print(f"    ❌ Archivo no existe")
-                    
-                if not flag_path:
-                    flag_path = constructed_path
-            
-            # Verificar existencia
-            if flag_path:
-                if flag_path.startswith('/'):
-                    flag_path = str(Path.cwd() / flag_path.lstrip('/'))
-                
-                exists = Path(flag_path).exists()
-                print(f"  - {cat}: Ruta final: {flag_path} ({'✅ Existe' if exists else '❌ No existe'})")
+        # Usar la función auxiliar de depuración
+        debug_flag_paths(
+            df=self.df,
+            flags_config=flags_config,
+            cat_col=cat_col,
+            current_dir=Path.cwd()
+        )
     
     def add_legend(self):
         """Añade la leyenda si está habilitada."""
-        # La versión simplificada solo usa los parámetros básicos para evitar errores
-        if bool(self.params.get("legend", True)):
-            # Obtener configuración
-            legend_config = self.params.get("legend_config", {})
-            
-            # Parámetros básicos (compatibilidad)
-            legend_loc = self.params.get("legend_loc", "lower right")
-            legend_fontsize = self.params.get("legend_fontsize", 10)
-            
-            # Uso de parámetros avanzados si están disponibles
-            loc = legend_config.get("loc", legend_loc)
-            fontsize = legend_config.get("fontsize", legend_fontsize)
-            frameon = legend_config.get("frameon", False)
-            title = legend_config.get("title", None)
-            title_fontsize = legend_config.get("title_fontsize", None)
-            title_fontweight = legend_config.get("title_fontweight", "normal")
-            
-            # Parámetros adicionales avanzados
-            ncol = legend_config.get("ncol", 1)  # Número de columnas
-            bbox_to_anchor = legend_config.get("bbox_to_anchor", None)
-            
-            # Espaciado y formato avanzados
-            borderpad = legend_config.get("borderpad", 0.4)
-            labelspacing = legend_config.get("labelspacing", 0.5)
-            handlelength = legend_config.get("handlelength", 2.0)
-            handleheight = legend_config.get("handleheight", 0.7)
-            handletextpad = legend_config.get("handletextpad", 0.8)
-            borderaxespad = legend_config.get("borderaxespad", 0.5)
-            columnspacing = legend_config.get("columnspacing", 2.0)
-            
-            # Apariencia de la caja
-            facecolor = legend_config.get("facecolor", "inherit")
-            edgecolor = legend_config.get("edgecolor", "inherit")
-            framealpha = legend_config.get("framealpha", None)
-            shadow = legend_config.get("shadow", False)
-            fancybox = legend_config.get("fancybox", False)
-            
-            # Crear la leyenda con parámetros avanzados
-            legend = self.ax.legend(
-                loc=loc,
-                fontsize=fontsize,
-                frameon=frameon,
-                title=title,
-                title_fontsize=title_fontsize,
-                ncol=ncol,
-                bbox_to_anchor=bbox_to_anchor,
-                borderpad=borderpad,
-                labelspacing=labelspacing,
-                handlelength=handlelength,
-                handleheight=handleheight,
-                handletextpad=handletextpad,
-                borderaxespad=borderaxespad,
-                columnspacing=columnspacing,
-                facecolor=facecolor,
-                edgecolor=edgecolor,
-                framealpha=framealpha,
-                shadow=shadow,
-                fancybox=fancybox
-            )
-            
-            # Configuración adicional del título de la leyenda
-            if title and legend.get_title():
-                legend.get_title().set_fontweight(title_fontweight)
+        # Usar el método de la clase base BaseChart
+        super().add_legend()
     def add_labels(self):
         """Añade etiquetas de totales."""
-        # Etiquetas de totales
-        total_cfg = self.params.get("total_labels", {})
-        if bool(total_cfg.get("enabled", False)):
-            offset = float(total_cfg.get("x_offset", 4.0))
-            font_size = float(total_cfg.get("font_size", 11))
-            font_weight = total_cfg.get("font_weight", "bold")
-            
-            for i, total in enumerate(self.bottoms):
-                self.ax.text(
-                    total + offset/72 * (self.fig.get_figwidth() * self.fig.dpi) / (self.ax.get_position().width * self.fig.get_figwidth()),
-                    self.y_positions[i],
-                    f"{int(total)}",
-                    ha='left', va='center',
-                    fontsize=font_size,
-                    fontweight=font_weight,
-                    color="#333333"
-                )
+        # Usar el método de la clase base BaseChart
+        super().add_labels()
     
     def add_title(self):
         """
@@ -680,7 +551,7 @@ class SimpleBarChart:
         left_margin = float(title_spacing.get("left_margin", 0.0))  # Margen izquierdo global
         right_margin = float(title_spacing.get("right_margin", 0.0))  # Margen derecho global
         
-        print(f"\nℹ️ Configuración de espaciado de títulos:")
+        print("\nℹ️ Configuración de espaciado de títulos:")
         print(f"  - Espacio superior del título: {title_top_margin:.2f} (desde borde superior)")
         print(f"  - Espacio entre título y subtítulo: {title_bottom_margin:.2f} + {subtitle_top_margin:.2f} = {title_bottom_margin + subtitle_top_margin:.2f}")
         print(f"  - Espacio debajo del subtítulo: {subtitle_bottom_margin:.2f}")
@@ -743,7 +614,7 @@ class SimpleBarChart:
             y_pos = 1.0 - title_top_margin
             
             # Debug para ver los valores calculados
-            print(f"DEBUG: Márgenes horizontales aplicados al título:")
+            print("DEBUG: Márgenes horizontales aplicados al título:")
             print(f"  - Márgenes globales: izquierdo={left_margin:.2f}, derecho={right_margin:.2f}")
             print(f"  - Paddings específicos: izquierdo={padding_left:.2f}, derecho={padding_right:.2f}")
             print(f"  - Posición X calculada: {x_pos:.2f} (alineación='{ha}')")
@@ -760,7 +631,7 @@ class SimpleBarChart:
             global_fontsize = self.params.get("title_font_size", 18)
             
             # Mostrar los valores para depuración
-            print(f"DEBUG: Valores de tamaño para el título:")
+            print("DEBUG: Valores de tamaño para el título:")
             print(f" - Valor explícito guardado: {explicit_fontsize}")
             print(f" - Valor en title_config.fontsize: {config_fontsize}")
             print(f" - Valor en params.title_font_size: {global_fontsize}")
@@ -820,7 +691,7 @@ class SimpleBarChart:
                     # El ancho efectivo disponible se reduce por los márgenes y paddings
                     effective_wrap_width = available_width * wrap_width - padding_left - padding_right
                     
-                    print(f"📝 Aplicando ajuste automático de texto al título:")
+                    print("📝 Aplicando ajuste automático de texto al título:")
                     print(f"  - Ancho de wrapping base: {wrap_width:.2f}")
                     print(f"  - Ancho disponible tras márgenes: {available_width:.2f}")
                     print(f"  - Ancho efectivo para wrapping: {effective_wrap_width:.2f}")
@@ -897,7 +768,6 @@ class SimpleBarChart:
                                 transform=self.ax_header.transAxes)
         elif subtitle_config and subtitle:
             # Usar configuración avanzada para el subtítulo
-            base_x_pos = subtitle_config.get("x", 0.5)
             
             # Ajustar la posición X según los márgenes izquierdo y derecho
             # y según la alineación horizontal (ha) del texto
@@ -947,7 +817,7 @@ class SimpleBarChart:
                 print(f"ℹ️ Posición del subtítulo calculada sin referencia al título: {y_pos:.2f}")
             
             # Debug para ver los valores calculados
-            print(f"DEBUG: Márgenes horizontales aplicados al subtítulo:")
+            print("DEBUG: Márgenes horizontales aplicados al subtítulo:")
             print(f"  - Márgenes globales: izquierdo={left_margin:.2f}, derecho={right_margin:.2f}")
             print(f"  - Paddings específicos: izquierdo={padding_left:.2f}, derecho={padding_right:.2f}")
             print(f"  - Posición X calculada: {x_pos:.2f} (alineación='{ha}')")
@@ -961,7 +831,7 @@ class SimpleBarChart:
             global_fontsize = self.params.get("subtitle_font_size", 13)
             
             # Mostrar los valores para depuración
-            print(f"DEBUG: Valores de tamaño para el subtítulo:")
+            print("DEBUG: Valores de tamaño para el subtítulo:")
             print(f" - Valor explícito guardado: {explicit_fontsize}")
             print(f" - Valor en subtitle_config.fontsize: {config_fontsize}")
             print(f" - Valor en params.subtitle_font_size: {global_fontsize}")
@@ -1015,7 +885,7 @@ class SimpleBarChart:
                     # El ancho efectivo disponible se reduce por los márgenes y paddings
                     effective_wrap_width = available_width * wrap_width - padding_left - padding_right
                     
-                    print(f"Aplicando ajuste manual de texto al subtítulo:")
+                    print("Aplicando ajuste manual de texto al subtítulo:")
                     print(f"  - Ancho de wrapping base: {wrap_width:.2f}")
                     print(f"  - Ancho disponible tras márgenes: {available_width:.2f}")
                     print(f"  - Ancho efectivo para wrapping: {effective_wrap_width:.2f}")
@@ -1062,8 +932,7 @@ class SimpleBarChart:
         # Posición vertical para el footer (parte inferior de la figura)
         footer_y = float(footer_config.get("y_position", 0.03))
         
-        # Espaciado vertical para elementos del footer
-        footer_spacing = float(footer_config.get("spacing", 0.02))
+        # Espaciado vertical para elementos del footer (definido para referencia futura)
         
         # Marco opcional para el footer
         show_frame = bool(footer_config.get("show_frame", False))
@@ -1104,18 +973,20 @@ class SimpleBarChart:
             source_weight = source_config.get("weight", "normal")
             source_family = source_config.get("family", "Nunito")
             source_x = float(source_config.get("x_position", 0.15))
+            source_y = float(source_config.get("y_position", footer_y))
             
-            print(f"ℹ️ Configurando texto de fuente en footer:")
+            print("ℹ️ Configurando texto de fuente en footer:")
             print(f"  - Texto: '{source_text}'")
-            print(f"  - Posición: x={source_x}, y={footer_y}")
+            print(f"  - Posición: x={source_x}, y={source_y}")
+            print(f"  - Tamaño de fuente: {source_fontsize}")
             
             self.fig.text(
                 source_x,     # Posición horizontal personalizable
-                footer_y,     # Parte inferior
+                source_y,     # Posición vertical personalizada
                 source_text,
                 ha='left',
                 va='center',
-                fontsize=source_fontsize,
+                fontsize=float(source_fontsize),  # Asegurarse que es float
                 color=source_color,
                 style=source_style,
                 weight=source_weight,
@@ -1133,19 +1004,21 @@ class SimpleBarChart:
             note_weight = note_config.get("weight", "normal")
             note_family = note_config.get("family", "Nunito")
             note_x = float(note_config.get("x_position", 0.5))
+            note_y = float(note_config.get("y_position", footer_y))
             note_align = note_config.get("alignment", "center")
             
-            print(f"ℹ️ Configurando texto de nota en footer:")
+            print("ℹ️ Configurando texto de nota en footer:")
             print(f"  - Texto: '{note_text}'")
-            print(f"  - Posición: x={note_x}, y={footer_y}")
+            print(f"  - Posición: x={note_x}, y={note_y}")
+            print(f"  - Tamaño de fuente: {note_fontsize}")
             
             self.fig.text(
                 note_x,       # Posición horizontal personalizable
-                footer_y,     # Parte inferior
+                note_y,       # Posición vertical personalizada
                 note_text,
                 ha=note_align,
                 va='center',
-                fontsize=note_fontsize,
+                fontsize=float(note_fontsize),  # Asegurarse que es float
                 color=note_color,
                 style=note_style,
                 weight=note_weight,
@@ -1165,7 +1038,6 @@ class SimpleBarChart:
                 try:
                     from matplotlib.image import imread
                     from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-                    import numpy as np
                     
                     # Cargar la imagen del logo
                     logo_img = imread(logo_path)
@@ -1252,7 +1124,7 @@ class SimpleBarChart:
                         elif logo_align == "center":
                             logo_align = (0.5, 0.5)
                     
-                    print(f"ℹ️ Añadiendo logo en footer:")
+                    print("ℹ️ Añadiendo logo en footer:")
                     print(f"  - Archivo: '{logo_path}'")
                     print(f"  - Método de tamaño: '{size_method}'")
                     print(f"  - Factor de zoom calculado: {logo_zoom:.4f}")
@@ -1275,12 +1147,124 @@ class SimpleBarChart:
                 except Exception as e:
                     print(f"⚠️ Error al cargar el logo {logo_path}: {e}")
     
+    def add_decorative_elements(self):
+        """
+        Añade elementos decorativos al gráfico basados en la configuración.
+        Soporta rectángulos, líneas y otros elementos visuales para estilo Statista.
+        """
+        # Verificar si hay configuración de elementos decorativos
+        decorative_elements = self.params.get("decorative_elements", [])
+        
+        if not decorative_elements:
+            print("ℹ️ No hay elementos decorativos configurados.")
+            return
+            
+        print(f"🎨 Añadiendo {len(decorative_elements)} elementos decorativos...")
+        
+        for i, element in enumerate(decorative_elements):
+            element_type = element.get("type", "").lower()
+            
+            try:
+                # Elemento tipo rectángulo (como la barra vertical roja de Statista)
+                if element_type == "rectangle":
+                    # Coordenadas y dimensiones (en fracción de figura)
+                    x = float(element.get("x", 0))
+                    y = float(element.get("y", 0))
+                    width = float(element.get("width", 0.01))
+                    height = float(element.get("height", 0.5))
+                    color = element.get("color", "#ff3b30")  # Color rojo por defecto
+                    alpha = float(element.get("alpha", 1.0))
+                    zorder = int(element.get("zorder", 10))  # Orden de capa (sobre/bajo otros elementos)
+                    
+                    # Crear un Rectangle patch
+                    from matplotlib.patches import Rectangle
+                    rect = Rectangle(
+                        (x, y),                     # Posición (x, y) en fracción de figura
+                        width, height,              # Ancho y alto en fracción de figura
+                        facecolor=color,
+                        edgecolor='none',           # Sin borde
+                        alpha=alpha,
+                        transform=self.fig.transFigure,  # Usar coordenadas de figura
+                        zorder=zorder
+                    )
+                    
+                    # Añadir el rectángulo a la figura
+                    self.fig.add_artist(rect)
+                    print(f"  ✓ Añadido rectángulo decorativo en ({x:.2f}, {y:.2f}) con color {color}")
+                    
+                # Elemento tipo línea (para separadores u otros elementos)
+                elif element_type == "line":
+                    # Coordenadas de inicio y fin (en fracción de figura)
+                    x1 = float(element.get("x1", 0))
+                    y1 = float(element.get("y1", 0))
+                    x2 = float(element.get("x2", 1))
+                    y2 = float(element.get("y2", 0))
+                    linewidth = float(element.get("linewidth", 1.0))
+                    color = element.get("color", "#333333")
+                    alpha = float(element.get("alpha", 1.0))
+                    zorder = int(element.get("zorder", 10))
+                    linestyle = element.get("linestyle", "-")
+                    
+                    # Crear una Line2D
+                    from matplotlib.lines import Line2D
+                    line = Line2D(
+                        [x1, x2], [y1, y2],         # Puntos de inicio y fin
+                        linewidth=linewidth,
+                        color=color,
+                        alpha=alpha,
+                        zorder=zorder,
+                        linestyle=linestyle,
+                        transform=self.fig.transFigure
+                    )
+                    
+                    # Añadir la línea a la figura
+                    self.fig.add_artist(line)
+                    print(f"  ✓ Añadida línea decorativa de ({x1:.2f}, {y1:.2f}) a ({x2:.2f}, {y2:.2f})")
+                    
+                # Texto decorativo (para etiquetas, notas o watermarks)
+                elif element_type == "text":
+                    # Posición y contenido
+                    x = float(element.get("x", 0.5))
+                    y = float(element.get("y", 0.5))
+                    text = element.get("text", "")
+                    fontsize = float(element.get("fontsize", 12))
+                    fontweight = element.get("fontweight", "normal")
+                    color = element.get("color", "#333333")
+                    alpha = float(element.get("alpha", 1.0))
+                    ha = element.get("ha", "center")
+                    va = element.get("va", "center")
+                    rotation = float(element.get("rotation", 0))
+                    zorder = int(element.get("zorder", 10))
+                    
+                    # Añadir el texto a la figura
+                    self.fig.text(
+                        x, y, text,
+                        fontsize=fontsize,
+                        fontweight=fontweight,
+                        color=color,
+                        alpha=alpha,
+                        ha=ha, va=va,
+                        rotation=rotation,
+                        zorder=zorder
+                    )
+                    print(f"  ✓ Añadido texto decorativo '{text}' en ({x:.2f}, {y:.2f})")
+                    
+                else:
+                    print(f"  ⚠️ Tipo de elemento decorativo no soportado: '{element_type}'")
+            
+            except Exception as e:
+                print(f"  ⚠️ Error al añadir elemento decorativo #{i+1}: {e}")
+                
     def finalize(self):
         """Finaliza y guarda el gráfico."""
         # No usar tight_layout que puede afectar la posición de los títulos
         # plt.tight_layout()
         # Elimina o comenta la siguiente línea:
         # self.ax.set_position([0.15, 0.05, 0.8, 0.8])
+        
+        # Añadir elementos decorativos antes de guardar
+        self.add_decorative_elements()
+        
         # Guardar si se especifica un archivo de salida
         if "outfile" in self.params:
             dpi = int(self.params.get("dpi", 300))
@@ -1296,115 +1280,22 @@ class SimpleBarChart:
                 print(f"✅ Gráfico guardado en: {outfile}")
         plt.close(self.fig)
 
-def _load_yaml(path: Path) -> dict:
-    """Carga configuración desde archivo YAML."""
-    with open(path, 'r', encoding='utf-8') as f:
-        return yaml.safe_load(f)
+# Las funciones _load_yaml y _merge_params se han trasladado a app/io_utils.py
 
-def _merge_params(base: dict, override: dict) -> dict:
-    """
-    Combina parámetros base con sobreescrituras, asegurando que las configuraciones
-    de nivel inferior (anidadas) tengan prioridad sobre las globales.
-    """
-    result = base.copy()
-    for k, v in override.items():
-        if isinstance(v, dict) and k in result and isinstance(result[k], dict):
-            result[k] = _merge_params(result[k], v)
-        else:
-            result[k] = v
-            
-    # Asegurar que las configuraciones específicas de título y subtítulo tengan prioridad
-    if 'title_config' in override and 'fontsize' in override['title_config']:
-        # Guardar explícitamente el tamaño de fuente del título en un campo especial
-        # para asegurar que no se pierda
-        result['_explicit_title_fontsize'] = float(override['title_config']['fontsize'])
-    
-    if 'subtitle_config' in override and 'fontsize' in override['subtitle_config']:
-        # Guardar explícitamente el tamaño de fuente del subtítulo en un campo especial
-        # para asegurar que no se pierda
-        result['_explicit_subtitle_fontsize'] = float(override['subtitle_config']['fontsize'])
-            
-    return result
-
-def _render_simple_stackedbarh(config: Path = typer.Argument(..., help="Ruta a config YAML")):
+def stackedbarh(config: Path = typer.Argument(..., help="Ruta a config YAML")):
     """Gráfico de barras horizontales apiladas con elementos básicos de matplotlib."""
-    # Cargar configuración
-    cfg = _load_yaml(config)
+    from app.chart_utils import render_chart
     
-    # Cargar template si existe
-    if "template" in cfg:
-        tpl = _load_yaml(Path(cfg["template"]))
-        params = _merge_params(tpl, cfg)
-    else:
-        params = cfg
-    
-    # Depuración para tamaños de fuente
-    print("\nDEBUG: Configuración final de tamaños de fuente:")
-    print(f" - title_font_size (global): {params.get('title_font_size')}")
-    print(f" - subtitle_font_size (global): {params.get('subtitle_font_size')}")
-    
-    if 'title_config' in params and 'fontsize' in params['title_config']:
-        print(f" - title_config.fontsize: {params['title_config']['fontsize']}")
-    else:
-        print(" - title_config.fontsize: No definido")
-        
-    if 'subtitle_config' in params and 'fontsize' in params['subtitle_config']:
-        print(f" - subtitle_config.fontsize: {params['subtitle_config']['fontsize']}")
-    else:
-        print(" - subtitle_config.fontsize: No definido")
-        
-    # Valores explícitos guardados durante el merge
-    print(f" - _explicit_title_fontsize: {params.get('_explicit_title_fontsize')}")
-    print(f" - _explicit_subtitle_fontsize: {params.get('_explicit_subtitle_fontsize')}")
-    
-    # Cargar datos
-    if "csv" in params.get("data", {}):
-        df = pd.read_csv(params["data"]["csv"])
-    else:
-        rows = params.get("data", {}).get("inline", {}).get("rows", [])
-        df = pd.DataFrame(rows)
-
-    # Añadir información de depuración sobre categorías
-    cat_col = params.get("data", {}).get("category_col", "")
-    print(f"🔍 Columna de categorías configurada: '{cat_col}'")
-    if cat_col in df.columns:
-        print(f"✅ Columna '{cat_col}' encontrada en el DataFrame")
-        print(f"📊 Ejemplos de valores en '{cat_col}':")
-        for i, val in enumerate(df[cat_col].head(5)):
-            print(f"  - {i+1}: {val}")
-    else:
-        print(f"❌ Columna '{cat_col}' NO encontrada en el DataFrame")
-        print(f"📋 Columnas disponibles: {list(df.columns)}")
-        
-    # Crear y renderizar el gráfico
-    chart = SimpleBarChart(params, df)
-    
-    # Depurar información de banderas si está habilitado
-    if params.get("debug", False):
-        chart.debug_flag_paths()
-    
-    chart.create_figure()
-    chart.draw_bars()
-    
-    # Usar configure_axes normal en lugar de configure_axes_with_flags cuando las banderas están desactivadas
-    if not params.get("flags", {}).get("enabled", False):
-        chart.configure_axes()
-    else:
-        chart.configure_axes_with_flags()
-        
-    chart.add_legend()
-    chart.add_labels()
-    chart.add_title()
-    chart.add_footer()
-    chart.finalize()
+    # Usar la función genérica para renderizar el gráfico
+    render_chart(StackedHorizontalBarChart, config)
 
 def add_command(app: typer.Typer) -> None:
-    app.command("simple_stackedbarh")(_render_simple_stackedbarh)
+    app.command("stackedbarh")(stackedbarh)
 
 if __name__ == "__main__":
     # Para pruebas directas
     import sys
     if len(sys.argv) > 1:
-        _render_simple_stackedbarh(Path(sys.argv[1]))
+        stackedbarh(Path(sys.argv[1]))
     else:
-        print("Uso: python simple_stackedbarh.py ruta/al/config.yml")
+        print("Uso: python stackedbarh.py ruta/al/config.yml")
