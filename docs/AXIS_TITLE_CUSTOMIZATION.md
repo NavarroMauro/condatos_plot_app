@@ -1,6 +1,6 @@
 # Personalización de Ejes y Títulos
 
-Este documento describe las opciones de configuración para personalizar los ejes y el espaciado de títulos en las gráficas de ConDatos.
+Este documento describe las opciones de configuración para personalizar los ejes y el espaciado de títulos en las gráficas de ConDatos, optimizadas para visualizaciones de datos centrados en Chile y su contexto regional latinoamericano.
 
 ## Configuración de Ejes
 
@@ -26,7 +26,7 @@ yaxis:
 
 ### Casos de Uso Comunes
 
-- **Gráfico limpio sin marcas ni etiquetas**:
+- **Gráfico limpio sin marcas ni etiquetas** (ideal para comparaciones simples de datos entre países de Latinoamérica):
 
 ```yaml
 xaxis:
@@ -37,7 +37,7 @@ yaxis:
   show_labels: false
 ```
 
-- **Etiquetas sin ticks (útil para gráficos con banderas)**:
+- **Etiquetas sin ticks** (recomendado para gráficos con banderas de países latinoamericanos):
 
 ```yaml
 yaxis:
@@ -45,7 +45,7 @@ yaxis:
   show_labels: true
 ```
 
-- **Solo líneas de cuadrícula sin etiquetas ni ticks**:
+- **Solo líneas de cuadrícula sin etiquetas ni ticks** (útil para mostrar tendencias regionales):
 
 ```yaml
 xaxis:
@@ -56,6 +56,15 @@ yaxis:
   show_ticks: false
   show_labels: false
   show_grid: true
+```
+
+- **Formato para comparación regional Chile-Latinoamérica** (destaca Chile entre los demás países):
+
+```yaml
+yaxis:
+  show_ticks: false
+  show_labels: true
+  highlight_labels: ["Chile"]  # Destacar Chile en las etiquetas
 ```
 
 ## Espaciado de Títulos
@@ -104,7 +113,7 @@ title_spacing:
 
 ### Banderas en Gráficos de Barras Horizontales
 
-Cuando se utilizan banderas en gráficos de barras horizontales con `flags.enabled: true`, la configuración de etiquetas del eje Y (`yaxis.show_labels`) tiene prioridad sobre la configuración de banderas.
+Cuando se utilizan banderas en gráficos de barras horizontales con `flags.enabled: true`, la configuración de etiquetas del eje Y (`yaxis.show_labels`) tiene prioridad sobre la configuración de banderas. Esto es particularmente útil para visualizaciones comparativas entre países latinoamericanos.
 
 ```yaml
 yaxis:
@@ -116,11 +125,22 @@ flags:
   position: end          # Posición de las banderas (start|end)
   size: 0.03             # Tamaño relativo de las banderas
   padding: 0.01          # Espacio adicional entre barras y banderas
+  highlight: ["CL"]      # Opcional: Destacar bandera de Chile
 ```
+
+#### Recomendaciones para Visualizaciones Regionales
+
+Para visualizaciones que comparan Chile con otros países de Latinoamérica, recomendamos:
+
+1. Utilizar banderas al inicio (`position: start`) para facilitar la identificación rápida de países
+2. Aumentar ligeramente el tamaño de la bandera de Chile (`size: 0.035`) cuando aparece en la comparativa
+3. Ordenar los países de forma que Chile aparezca en una posición destacada (primero o último de la lista)
+
+```yaml
 
 ## Ejemplos Completos
 
-### Gráfico de Barras Horizontales Apiladas con Banderas
+### Gráfico de Barras Horizontales Apiladas con Banderas (Comparativa Regional)
 
 ```yaml
 title_spacing:
@@ -143,6 +163,7 @@ flags:
   position: end
   size: 0.03
   padding: 0.01
+  highlight: ["CL"]  # Destacar la bandera de Chile
 ```
 
 Este ejemplo configura un gráfico de barras horizontales apiladas con:
@@ -151,3 +172,37 @@ Este ejemplo configura un gráfico de barras horizontales apiladas con:
 - Eje X completamente oculto (sin ticks, etiquetas ni cuadrícula)
 - Eje Y con etiquetas visibles pero sin ticks
 - Banderas de países al final de cada barra
+- Destaque especial para Chile en la visualización
+
+### Gráfico de Líneas para Series Temporales de Indicadores Económicos
+
+```yaml
+title_spacing:
+  top_margin: 0.35
+  bottom_margin: 0.20
+  subtitle_top_margin: 0.05
+
+xaxis:
+  show_ticks: true
+  show_labels: true
+  show_grid: true
+  title: "Años"
+
+yaxis:
+  show_ticks: true
+  show_labels: true
+  show_grid: true
+  title: "PIB per cápita (USD)"
+  
+highlight:
+  series: ["Chile"]  # Destacar la línea de Chile
+  color: "#D22730"   # Color rojo para Chile
+  width: 2.5         # Línea más gruesa para Chile
+```
+
+Este ejemplo configura un gráfico de líneas ideal para mostrar la evolución de Chile en comparación con otros países de Latinoamérica, donde:
+
+- Los ejes muestran ticks, etiquetas y cuadrícula para una lectura precisa de valores
+- Se incluyen títulos para ambos ejes para mayor claridad
+- La serie de datos de Chile se destaca visual y cromáticamente
+- El espaciado de títulos es estándar para permitir más espacio para el gráfico

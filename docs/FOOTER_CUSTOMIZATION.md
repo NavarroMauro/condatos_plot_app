@@ -1,6 +1,6 @@
 # Personalización de Footer
 
-Este documento describe las opciones disponibles para personalizar el footer (pie de página) de las gráficas.
+Este documento describe las opciones disponibles para personalizar el footer (pie de página) de las gráficas de ConDatos, con ejemplos específicos para visualizaciones de datos chilenos y latinoamericanos.
 
 ## Estructura básica
 
@@ -41,7 +41,7 @@ footer:
 ```yaml
 footer:
   # Texto simple (compatibilidad)
-  source: "Fuente: Organización XYZ, 2025"
+  source: "Fuente: INE Chile, 2023"
   source_fontsize: 9       # Tamaño de fuente (legacy)
   source_color: "#666666"  # Color (legacy)
   
@@ -54,6 +54,42 @@ footer:
     family: "Nunito"       # Familia de fuente
     x_position: 0.15       # Posición horizontal (0=izquierda, 1=derecha)
 ```
+
+### Patrones estandarizados para citar fuentes
+
+Para mantener la consistencia en todas las visualizaciones de ConDatos, recomendamos seguir estos formatos estandarizados:
+
+#### Datos de organismos oficiales chilenos
+
+```yaml
+source: "Fuente: [Institución], [Año]"
+```
+
+Ejemplo: `"Fuente: INE Chile, 2023"` o `"Fuente: Banco Central de Chile, 2023"`
+
+#### Datos regionales latinoamericanos
+
+```yaml
+source: "Fuente: [Institución Regional], [Año]"
+```
+
+Ejemplo: `"Fuente: CEPAL, 2023"` o `"Fuente: BID, 2023"`
+
+#### Múltiples fuentes
+
+```yaml
+source: "Fuentes: [Institución 1] y [Institución 2], [Año]"
+```
+
+Ejemplo: `"Fuentes: INE Chile y CEPAL, 2023"`
+
+#### Elaboración propia basada en datos oficiales
+
+```yaml
+source: "Elaboración: ConDatos en base a datos de [Fuente], [Año]"
+```
+
+Ejemplo: `"Elaboración: ConDatos en base a datos de INE Chile, 2023"`
 
 ## Configuración del texto de nota
 
@@ -123,7 +159,9 @@ footer:
       alignment: "right"
 ```
 
-## Ejemplo completo
+## Ejemplos completos
+
+### Ejemplo 1: Visualización de datos económicos chilenos
 
 ```yaml
 footer:
@@ -135,7 +173,7 @@ footer:
     frame_alpha: 0.08
     frame_color: "#f0f0f0"
 
-  source: "Fuente: Comité Olímpico Panamericano, 2025"
+  source: "Fuente: Banco Central de Chile, 2023"
   source_config:
     fontsize: 9
     color: "#555555"
@@ -155,15 +193,60 @@ footer:
     alignment: "center"
 
   logos:
-    - path: "assets/logo_condatos.png"
+    - path: "assets/logos/logo_condatos.png"
       size_method: "fraction"  # Usar tamaño como fracción de la figura
       width_fraction: 0.10     # 10% del ancho de la figura
       preserve_aspect_ratio: true
       x_position: 0.85
       alignment: "right"
-    - path: "assets/cc_by_nc_sa.png"
+    - path: "assets/logos/logo_chile.png"  # Logo adicional de Chile
       size_method: "pixels"    # Usar tamaño en píxeles
-      width_pixels: 80         # 80 píxeles de ancho
+      width_pixels: 60         # 60 píxeles de ancho
+      x_position: 0.70
+      alignment: "right"
+```
+
+### Ejemplo 2: Visualización comparativa regional
+
+```yaml
+footer:
+  config:
+    y_position: 0.03
+    spacing: 0.02
+    show_frame: true
+    frame_padding: 0.01
+    frame_alpha: 0.08
+    frame_color: "#f0f0f0"
+
+  source: "Fuentes: CEPAL y Banco Mundial, 2023"
+  source_config:
+    fontsize: 9
+    color: "#555555"
+    style: "italic"
+    weight: "normal"
+    family: "Nunito"
+    x_position: 0.15
+
+  note: "Elaboración: ConDatos en base a datos oficiales • CC BY 4.0"
+  note_config:
+    fontsize: 9
+    color: "#555555"
+    style: "normal"
+    weight: "normal"
+    family: "Nunito"
+    x_position: 0.5
+    alignment: "center"
+
+  logos:
+    - path: "assets/logos/logo_condatos.png"
+      size_method: "fraction"
+      width_fraction: 0.10
+      preserve_aspect_ratio: true
+      x_position: 0.85
+      alignment: "right"
+    - path: "assets/cc_by.png"
+      size_method: "pixels"
+      width_pixels: 80
       x_position: 0.70
       alignment: "right"
 ```
