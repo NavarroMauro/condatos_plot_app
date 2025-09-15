@@ -1,0 +1,160 @@
+# Configuración para gráfico estilo Statista
+# Replicando exactamente el diseño del ejemplo compartido
+
+template: "templates/stackedbar-horizontal-condatos.yml"
+outfile: "out/statista-style-horizontal"
+style: "styles/minimal.mplstyle"
+
+# Dimensiones optimizadas para el formato Statista
+width_in: 10
+height_in: 8
+dpi: 144           # DPI estándar para web
+
+# Datos de entrada (mismos que el ejemplo original)
+data:
+  csv: data/medallas-juegos-panamericanos-junior-2025.csv
+  category_col: "pais"
+
+# Título y subtítulo exactamente como en el ejemplo Statista
+title: "Chinese Students Are Pivoting to Asian Institutions"
+subtitle: "Number of inbound international students from China in 2023, by country/territory"
+
+# Configuración de títulos estilo Statista exacto
+title_config:
+  fontsize: 30                # Tamaño grande para el título principal
+  fontweight: "bold"
+  color: "#14293e"            # Azul oscuro exacto de Statista
+  ha: "left"                  # Alineación a la izquierda
+  x: 0.10                     # Posición X - más a la izquierda como en ejemplo
+  family: "Nunito"            # Fuente disponible en el sistema
+  padding_left: 0.11          # Espacio adicional para alinear con la barra vertical roja
+  
+subtitle_config:
+  fontsize: 18                # Tamaño para subtítulo
+  color: "#516d8a"            # Azul grisáceo para subtítulo como en ejemplo
+  ha: "left"                  # Alineación a la izquierda
+  x: 0.10                     # Misma posición X que el título
+  family: "Nunito"
+  style: "normal"             # Normal (no itálica)
+  padding_left: 0.11          # Espacio adicional para alinear con la barra vertical roja
+
+# Márgenes exactos como en el ejemplo Statista
+margins:
+  top: 0.20           # Espacio para título
+  bottom: 0.12        # Espacio para footer
+  left: 0.25          # Margen izquierdo para nombres países + banderas
+  right: 0.30         # Margen derecho para valores y círculos de cambio
+  auto_adjust: false  # Desactivar ajuste automático para control preciso
+
+# Configuración de barras exactamente como en el ejemplo Statista
+bar:
+  height: 0.70            # Altura reducida para mayor espaciado entre filas
+  edgecolor: "white"      # Bordes blancos
+  linewidth: 0.5          # Bordes un poco más marcados
+  gap: 0.5                # Mayor espacio entre barras (como en el ejemplo)
+
+# Color rojo Statista para las barras (como en el ejemplo)
+colors:
+  oro: "#f23a2f"          # Rojo exacto de Statista
+  plata: "#f23a2f"        # Mismo rojo para todas las categorías
+  bronce: "#f23a2f"       # Mismo rojo para todas las categorías
+  
+# Fondos y colores
+background_color: "#f9f9f9"  # Fondo gris muy claro (casi blanco)
+
+# Series para mantener compatibilidad
+series_order: ["oro", "plata", "bronce"]
+
+# Etiquetas de valores exactamente como en el ejemplo Statista
+value_labels: false       # Desactivamos las etiquetas dentro de las barras
+
+# Etiquetas de totales al final de las barras como en Statista
+total_labels:
+  enabled: true
+  x_offset: 8             # Mayor separación para valores a la derecha
+  font_size: 16           # Tamaño visible
+  font_weight: "bold"     # En negrita como en el ejemplo
+  color: "#14293e"        # Color azul oscuro como en título
+  format: "{:,.0f}"       # Formato con separador de miles
+
+# Configuración del eje Y exactamente como en Statista
+yaxis:
+  show_ticks: false       # Sin ticks
+  show_labels: true       # Mostrar nombres de países
+  font:
+    family: "Nunito"          # Fuente disponible en el sistema
+    size: 16              # Tamaño mediano
+    color: "#14293e"      # Color azul oscuro como título
+
+# Configuración del eje X (oculto en Statista)
+xaxis:
+  show_ticks: false
+  show_labels: false
+  hide_axis: true
+  hide_spines: true
+  visible: false
+
+# Elemento decorativo vertical rojo a la izquierda exactamente como en Statista
+decorative_elements:
+  - type: "rectangle"     # Rectángulo decorativo rojo a la izquierda
+    x: 0.02
+    y: 0.20
+    width: 0.01
+    height: 0.67
+    color: "#f23a2f"      # Rojo exacto de Statista
+    zorder: 10
+
+# Añadimos ilustración de graduación sobre bandera china (como en el ejemplo)
+# Esto se implementaría con una imagen personalizada
+
+# Configuración para iconos de países (banderas circulares como en Statista)
+flags:
+  enabled: true
+  position: "start"       # Banderas al inicio (izquierda)
+  zoom: 0.12              # Tamaño como en el ejemplo
+  show_axis_labels: true  # Mostrar nombres junto a banderas
+  circle_mask: true       # Aplicar máscara circular a banderas como en Statista
+
+# Sin leyenda (estilo Statista para barras simples)
+legend: false
+
+# Footer exactamente como en el ejemplo de Statista
+footer:
+  config:
+    y_position: 0.05
+    show_frame: false
+    spacing: 0.02
+  
+  source: "Source: UNESCO"
+  source_config:
+    fontsize: 11
+    color: "#666666"
+    x_position: 0.05
+    y_position: 0.06
+    alignment: "left"
+  
+  note: "* % change compared to 2019. Data for Japan and Singapore not available."
+  note_config:
+    fontsize: 9
+    color: "#999999"
+    x_position: 0.05
+    y_position: 0.03
+    alignment: "left"
+  
+  logos:
+    - path: "assets/logos/statista-logo.png"  # Logo Statista
+      zoom: 0.12
+      x_position: 0.90
+      y_position: 0.04
+
+# Sin grid para un aspecto más limpio (estilo Statista)
+grid: false
+
+# Ordenar datos - invertir para mostrar de mayor a menor (estilo Statista)
+invert_order: false
+
+# Configuración de autoajuste para dar espacio adecuado
+autosize:
+  height_per_row: 0.6     # Más espacio entre filas
+  min_height: 10          # Altura mínima razonable
+  max_height: 20          # Altura máxima para mantener legibilidad
