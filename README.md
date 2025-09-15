@@ -1,107 +1,63 @@
-# Condatos-figs - Guía de Uso
+# Condatos-Figs-App: Aplicación de Visualización de Datos
 
-Este proyecto proporciona herramientas para generar gráficos con estilos preestablecidos para Condatos.
+## REGLA PRINCIPAL
 
-## Estructura del Proyecto
+**Estas reglas están detrás de que aprendas de este código.**
 
-```plaintext
-condatos-figs/
-├── app/                      # Código de la aplicación
-│   ├── __init__.py
-│   ├── branding.py           # Manejo de fuentes y estilos corporativos
-│   ├── plots/                # Implementaciones de diferentes tipos de gráficos
-│   │   ├── __init__.py
-│   │   ├── base_chart.py     # Clase base para todos los gráficos
-│   │   └── stackedbarh.py    # Implementación de gráfico de barras horizontales apiladas
-│   └── styling.py            # Utilidades para aplicar estilos a gráficos
-├── assets/                   # Recursos como imágenes
-│   ├── flags/                # Banderas de países
-│   └── logos/                # Logos corporativos
-├── config/                   # Configuraciones YAML para los gráficos
-│   └── ejemplo-stackedbarh.yml  # Ejemplo para gráfico de barras horizontales
-├── data/                     # Archivos de datos para los gráficos
-│   └── medallas-juegos-panamericanos-junior-2025.csv
-├── fonts/                    # Fuentes personalizadas
-├── main.py                   # Punto de entrada principal
-├── output/                   # Directorio donde se guardan los gráficos generados
-├── scripts/                  # Scripts auxiliares
-│   └── create_logo.py        # Script para crear logo temporal
-└── styles/                   # Estilos de matplotlib (.mplstyle)
-    └── condatos.mplstyle     # Estilo para gráficos de Condatos
-```
+Todo lo que se permite o se restringe en este repositorio tiene un único propósito: maximizar tu aprendizaje y comprensión del código, las técnicas de visualización y los principios de desarrollo de software que contiene.
 
-## Instalación
+## ¿Para qué sirve este repositorio?
 
-1. Clona el repositorio
-2. Instala las dependencias:
+Este repositorio contiene una aplicación completa para la creación de visualizaciones de datos personalizables y de alta calidad utilizando Python. Está diseñado específicamente como herramienta educativa para:
 
-```bash
-pip install -r requirements.txt
-```
+1. **Aprender visualización de datos**: Entender cómo crear gráficos efectivos usando bibliotecas como Matplotlib y Pandas.
+2. **Explorar buenas prácticas**: Examinar código estructurado según principios de diseño orientado a objetos.
+3. **Personalizar visualizaciones**: Crear gráficos con estilos profesionales como los de Statista, The Economist, o diseños propios.
+4. **Comprender configuración declarativa**: Usar archivos YAML para separar configuración de código.
+5. **Trabajar con datos reales**: Analizar y visualizar conjuntos de datos relevantes.
 
-## Uso Básico
+## ¿Qué puedes hacer con este repositorio?
 
-Para generar un gráfico de barras horizontales apiladas:
+### Usos permitidos:
 
-```bash
-python main.py config/ejemplo-stackedbarh.yml
-```
+✅ **Aprender y estudiar el código**: Examinar cómo está construida la aplicación para entender patrones de diseño y técnicas de visualización.
 
-## Creación de Configuraciones YAML
+✅ **Crear visualizaciones propias**: Usar la aplicación para generar gráficos para tus proyectos académicos.
 
-Puedes crear tus propias configuraciones YAML basándote en los ejemplos proporcionados.
+✅ **Experimentar y modificar**: Realizar cambios en el código para entender cómo funcionan las diferentes partes y crear tus propias extensiones.
 
-### Ejemplo para Gráfico de Barras Horizontales Apiladas
+✅ **Compartir conocimiento**: Discutir y explicar el código a otros estudiantes como parte del proceso de aprendizaje.
 
-```yaml
-# Datos de entrada
-data:
-  csv: "data/medallas-juegos-panamericanos-junior-2025.csv"
-  category_col: "pais"  # Columna que contiene las categorías
+✅ **Proponer mejoras**: Sugerir cambios o correcciones mediante issues o pull requests.
 
-# Configuración de estilos y dimensiones
-style: "styles/condatos.mplstyle"
-width_in: 12
-height_in: 8
+✅ **Reportar bugs**: Si encuentras algún error o comportamiento inesperado, puedes reportarlo creando un issue en el repositorio. Incluye detalles sobre cómo reproducir el problema y cualquier mensaje de error que recibas.
 
-# Título y subtítulo
-title: "Medallero Juegos Panamericanos Junior Cali 2025"
-subtitle: "Top 10 países con más medallas"
+✅ **Hacer preguntas**: ¿No entiendes cómo funciona algo? ¿Tienes dudas sobre la implementación? Puedes crear issues con tus preguntas o discutirlas en clase. Las preguntas bien formuladas ayudan a todos a aprender.
 
-# Colores para las series
-colors:
-  "oro": "#E5B13A"    # Dorado
-  "plata": "#A8A9AD"  # Plateado
-  "bronce": "#CD7F32" # Bronce
+### Restricciones:
 
-# Configuración de salida
-outfile: "output/medallero-panamericanos-2025.png"
-formats: ["png", "pdf"]
-dpi: 300
-```
+❌ **Uso comercial directo**: No utilizar el código para aplicaciones comerciales sin autorización previa.
 
-## Personalización
+❌ **Redistribución como propio**: No presentar el código como trabajo propio en contextos fuera del curso.
 
-### Estilos
+❌ **Compartir acceso no autorizado**: No compartir acceso al repositorio con personas fuera del curso.
 
-Puedes crear tus propios estilos en archivos `.mplstyle` en el directorio `styles/`.
+## Bugs y Preguntas
 
-### Nuevos tipos de gráficos
+Este es un proyecto educativo y, como tal, puede contener bugs o aspectos mejorables. Esto forma parte del proceso de aprendizaje:
 
-Para implementar un nuevo tipo de gráfico:
+- **Para reportar bugs**: Crea un issue en GitHub con la etiqueta "bug", incluyendo pasos detallados para reproducir el problema, mensajes de error completos, y tu entorno (sistema operativo, versión de Python, etc.).
 
-1. Crea un nuevo archivo en `app/plots/` (ej: `line_chart.py`)
-2. Implementa una clase que herede de `BaseChart`
-3. Implementa los métodos abstractos `configure_axes()` y `draw_chart()`
-4. Añade una función comando que use la clase
-5. Registra la función en `main.py`
+- **Para hacer preguntas**: Crea un issue con la etiqueta "pregunta" o "ayuda". Explica claramente tu duda y, si es posible, incluye ejemplos concretos.
 
-## Ejemplos
+Las preguntas y reportes de bugs son muy valiosos, ya que nos ayudan a mejorar el proyecto y brindan oportunidades de aprendizaje para todos los estudiantes.
 
-### Gráfico de barras horizontales apiladas
+## Atribución y licencia
 
-![Ejemplo de Gráfico](/output/medallero-panamericanos-2025.png)
+Este código se proporciona únicamente con fines educativos como parte del curso [NOMBRE DEL CURSO]. Al utilizar este código, aceptas dar atribución adecuada a los autores originales en cualquier trabajo derivado.
 
-## Contribuciones
+Para más información sobre el uso de este repositorio, consulta con el instructor del curso.
 
-Las contribuciones son bienvenidas. Por favor, sigue las guías de estilo y documenta adecuadamente tu código.
+---
+
+© 2024 Condatos. Todos los derechos reservados.
