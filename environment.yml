@@ -1,4 +1,4 @@
-name: condatos-figs
+name: condatos-figs-app
 channels:
   - conda-forge
   - defaults

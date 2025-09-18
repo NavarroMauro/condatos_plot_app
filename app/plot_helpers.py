@@ -11,6 +11,10 @@ from matplotlib.axes import Axes
 from PIL import Image
 from .branding import add_branding
 from .io_utils import save_fig_multi
+from matplotlib.legend_handler import HandlerBase
+import matplotlib.pyplot as plt
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+import numpy as np
 
 # =============================
 # IO / utilidades de imágenes
@@ -642,3 +646,426 @@ def finish_and_save(fig, params: Mapping[str, Any]):
 
     # 4. Limpiar recursos
     fig.canvas.draw_idle()
+
+class ImageHandler(HandlerBase):
+    """
+    Handler para incluir imágenes en lugar de marcadores de colores en la leyenda.
+    
+    Parameters
+    ----------
+    image_path : str
+        Ruta absoluta a la imagen a mostrar
+    zoom : float
+        Factor de zoom para la imagen
+    """
+    def __init__(self, image_path, zoom=0.15):
+        self.image_path = image_path
+        self.zoom = zoom
+        super().__init__()
+    
+    def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
+        from matplotlib.image import imread
+        from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+        from matplotlib.patches import Rectangle
+        import numpy as np
+        
+        # Cargar la imagen
+        img = imread(self.image_path)
+        print(f"[DEBUG] Imagen cargada: {self.image_path} shape={img.shape} dtype={img.dtype}")
+        # Si tiene canal alfa, convertir a RGB ignorando alfa
+        if img.ndim == 3 and img.shape[2] == 4:
+            alpha = img[..., 3]
+            if np.all(alpha == 0):
+                print(f"⚠️ Imagen completamente transparente: {self.image_path}")
+            img = img[..., :3]  # Quitar canal alfa
+            print(f"[DEBUG] Imagen convertida a RGB (sin alfa): shape={img.shape}")
+        elif np.all(img == 0):
+            print(f"⚠️ Imagen completamente vacía (todo ceros): {self.image_path}")
+
+        # Crear imagen con zoom (prueba con zoom mayor si no se ve)
+        imagebox = OffsetImage(img, zoom=max(self.zoom, 0.3))
+        imagebox.image.axes = legend.axes
+
+        # Crear annotation box centrada en la posición
+        ab = AnnotationBbox(
+            imagebox,
+            (xdescent + width/2., ydescent + height/2.),
+            frameon=False,
+            pad=0.0,
+            box_alignment=(0.5, 0.5),
+        )
+        ab.set_transform(trans)
+
+        # Agregar un borde visual para debug
+        border = Rectangle(
+            (xdescent, ydescent), width, height,
+            linewidth=1, edgecolor='red', facecolor='none', zorder=10
+        )
+        border.set_transform(trans)
+
+        return [ab, border]
+
+
+class ColorableSVGHandler(HandlerBase):
+    """
+    Handler para incluir SVGs coloreables en la leyenda.
+    
+    Esta clase permite usar un único archivo SVG como plantilla y aplicarle
+    diferentes colores para representar diferentes elementos en la leyenda.
+    
+    Parameters
+    ----------
+    svg_path : str
+        Ruta absoluta al archivo SVG a mostrar
+    color : str
+        Color en formato hex (#RRGGBB) para aplicar al SVG
+    zoom : float
+        Factor de zoom para la imagen
+    """
+    def __init__(self, svg_path, color, zoom=0.15):
+        self.svg_path = svg_path
+        self.color = color
+        self.zoom = zoom
+        super().__init__()
+    
+    def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
+        import io
+        import matplotlib.pyplot as plt
+        from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+        from pathlib import Path
+        
+        # Leer el archivo SVG
+        with open(self.svg_path, 'r') as f:
+            svg_content = f.read()
+        
+        # Reemplazar 'currentColor' por el color especificado
+        # Esto asume que el SVG usa 'currentColor' como valor para los atributos
+        # que deben ser coloreados dinámicamente
+        colored_svg = svg_content.replace('currentColor', self.color)
+        
+        # Crear un archivo en memoria con el SVG modificado
+        svg_buffer = io.BytesIO()
+        svg_buffer.write(colored_svg.encode('utf-8'))
+        svg_buffer.seek(0)
+        
+        # Usar matplotlib para cargar el SVG modificado
+        try:
+            # Crear una figura temporal para cargar el SVG
+            temp_fig = plt.figure(figsize=(1, 1), dpi=100)
+            img = plt.imread(svg_buffer, format='svg')
+            plt.close(temp_fig)
+            
+            # Crear imagen con zoom
+            imagebox = OffsetImage(img, zoom=self.zoom)
+            imagebox.image.axes = legend.axes
+            
+            # Crear annotation box centrada en la posición
+            ab = AnnotationBbox(
+                imagebox,
+                (xdescent + width/2., ydescent + height/2.),
+                frameon=False,
+                pad=0.0,
+                box_alignment=(0.5, 0.5),
+            )
+            ab.set_transform(trans)
+            
+            return [ab]
+            
+        except Exception as e:
+            print(f"⚠️ Error al cargar SVG coloreado: {e}")
+            # Fallback: usar un rectángulo del color especificado
+            from matplotlib.patches import Rectangle
+            rect = Rectangle((xdescent, ydescent), width, height, 
+                             facecolor=self.color, edgecolor='black')
+            rect.set_transform(trans)
+            return [rect]
+
+def add_logo_to_figure(fig, logo_config):
+    """
+    Añade un logo a la figura basado en la configuración.
+    
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure
+        La figura donde añadir el logo
+    logo_config : dict
+        Configuración del logo con keys:
+        - path: ruta al archivo de imagen
+        - position: 'above_legend', 'top_left', 'top_right', 'custom'
+        - zoom: factor de zoom (default: 0.15)
+        - x, y: coordenadas personalizadas (si position='custom')
+        - margin: margen sobre la leyenda (si position='above_legend')
+    """
+    if not logo_config or not logo_config.get("path"):
+        return
+        
+    from matplotlib.image import imread
+    from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+    from pathlib import Path
+    
+    # Cargar logo
+    logo_path = logo_config.get("path")
+    zoom = logo_config.get("zoom", 0.15)
+    position = logo_config.get("position", "custom")
+    margin = logo_config.get("margin", 0.02)
+    
+    if not Path(logo_path).exists():
+        print(f"⚠️ No se encontró el archivo de logo: {logo_path}")
+        return
+        
+    img = imread(logo_path)
+    imagebox = OffsetImage(img, zoom=zoom)
+    
+    # Determinar posición
+    x, y = 0.9, 0.9  # Valores por defecto
+    
+    print(f"📌 Añadiendo logo desde: {logo_path}")
+    print(f"📌 Posición configurada: {position}")
+    
+    if position == "above_legend":
+        # Buscar la leyenda en todos los ejes, incluyendo legend_ax que podría existir para leyendas personalizadas
+        legend_found = False
+        
+        # Primero buscar leyendas estándar
+        for ax in fig.axes:
+            legend = ax.get_legend()
+            if legend:
+                legend_found = True
+                bbox = legend.get_window_extent().transformed(fig.transFigure.inverted())
+                x = (bbox.x0 + bbox.x1) / 2
+                y = bbox.y1 + margin
+                print(f"📌 Leyenda estándar encontrada, colocando logo en x={x:.2f}, y={y:.2f}")
+                break
+        
+        # Si no se encontró una leyenda estándar, buscar un axes específico para leyenda personalizada
+        if not legend_found:
+            for ax in fig.axes:
+                # Verificar si este es un axes específico para leyenda personalizada
+                if hasattr(ax, 'get_label') and ('legend' in str(ax.get_label()).lower() or 'custom_legend' in str(ax.get_label()).lower()):
+                    legend_found = True
+                    bbox = ax.get_window_extent().transformed(fig.transFigure.inverted())
+                    x = (bbox.x0 + bbox.x1) / 2
+                    y = bbox.y1 + margin
+                    print(f"📌 Axes de leyenda personalizada encontrado, colocando logo en x={x:.2f}, y={y:.2f}")
+                    break
+        
+        # Posición fallback si no se encuentra ninguna leyenda
+        if not legend_found:
+            print("⚠️ No se encontró leyenda para posicionar el logo encima, usando posición predeterminada")
+            # Usar una posición razonable en el cuadrante derecho superior
+            if logo_config.get("fallback_position") == "top_right":
+                x, y = 0.9, 0.9
+                print(f"📌 Usando posición fallback para logo en esquina superior derecha: x={x}, y={y}")
+            elif logo_config.get("fallback_position") == "top_center":
+                x, y = 0.5, 0.9
+                print(f"📌 Usando posición fallback para logo en centro superior: x={x}, y={y}")
+                
+    elif position == "top_left":
+        x, y = 0.05, 0.95
+        print(f"📌 Logo en esquina superior izquierda: x={x}, y={y}")
+    elif position == "top_right":
+        x, y = 0.95, 0.95
+        print(f"📌 Logo en esquina superior derecha: x={x}, y={y}")
+    elif position == "custom":
+        x = logo_config.get("x", 0.9)
+        y = logo_config.get("y", 0.9)
+        print(f"📌 Logo en posición personalizada: x={x}, y={y}")
+    
+    # Añadir logo
+    ab = AnnotationBbox(
+        imagebox,
+        (x, y),
+        frameon=False,
+        box_alignment=(0.5, 0.5),  # Centrado
+        pad=0,
+        xycoords='figure fraction',
+        annotation_clip=False
+    )
+    fig.add_artist(ab)
+    return ab
+
+def create_custom_legend_with_images(ax, fig, legend_config):
+    """
+    Crea una leyenda personalizada con imágenes o SVGs coloreables en lugar de marcadores de colores.
+    
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        El eje donde se añadirá la leyenda
+    fig : matplotlib.figure.Figure
+        La figura para coordenadas de transformación
+    legend_config : dict
+        Configuración de la leyenda incluyendo 'icons' con las imágenes
+        
+    Returns
+    -------
+    matplotlib.legend.Legend
+        La leyenda creada, o None si no se pudo crear
+    """
+    # Verificar si queremos usar la implementación alternativa con imágenes directas
+    if legend_config.get("custom_icons") and legend_config.get("use_direct_drawing", True):
+        try:
+            from .custom_legend import CustomImageLegend
+            print("🔍 Leyenda personalizada: Usando implementación directa con CustomImageLegend")
+            custom_legend = CustomImageLegend(fig, ax, legend_config)
+            if custom_legend.draw():
+                print("✅ Leyenda personalizada dibujada correctamente con CustomImageLegend")
+                return None  # No hay leyenda estándar para devolver
+            else:
+                print("⚠️ Error al dibujar leyenda personalizada, intentando método alternativo")
+        except Exception as e:
+            print(f"❌ Error con CustomImageLegend: {e}. Usando método alternativo.")
+    
+    # Si no se usa la implementación directa o falló, usar el método original
+    if not legend_config.get("custom_icons"):
+        return None
+        
+    print("🔍 Creando leyenda personalizada con imágenes (método original)")
+        
+    icons = legend_config.get("icons", [])
+    if not icons:
+        print("⚠️ Se solicitó leyenda con íconos pero no se proporcionaron imágenes.")
+        return None
+        
+    print(f"🔍 Encontradas {len(icons)} imágenes para la leyenda personalizada")
+    
+    # Crear elementos ficticios para la leyenda
+    import matplotlib.patches as mpatches
+    handles = [mpatches.Rectangle((0, 0), 1, 1) for _ in range(len(icons))]
+    labels = [icon.get("label", f"Item {i+1}") for i, icon in enumerate(icons)]
+    
+    print(f"🔍 Etiquetas para la leyenda: {labels}")
+    
+    # Crear diccionario de handlers
+    handler_map = {}
+    for i, (handle, icon) in enumerate(zip(handles, icons)):
+        # Determinar si es un SVG coloreable o una imagen normal
+        if icon.get("svg_template") and icon.get("color"):
+            # Es un SVG coloreable
+            svg_path = icon.get("svg_template")
+            color = icon.get("color")
+            zoom = icon.get("zoom", 0.15)
+            
+            if not Path(svg_path).exists():
+                print(f"⚠️ No se encontró el SVG plantilla: {svg_path}")
+                continue
+            
+            handler_map[handle] = ColorableSVGHandler(svg_path, color, zoom)
+            print(f"✅ SVG coloreable añadido: {svg_path} con color {color} (zoom={zoom})")
+            
+        else:
+            # Es una imagen normal
+            image_path = icon.get("image")
+            if not image_path:
+                print(f"⚠️ No se especificó ruta de imagen para el elemento {i+1}")
+                continue
+                
+            if not Path(image_path).exists():
+                print(f"⚠️ No se encontró la imagen para la leyenda: {image_path}")
+                continue
+            
+            zoom = icon.get("zoom", 0.15)
+            handler_map[handle] = ImageHandler(image_path, zoom)
+            print(f"✅ Imagen añadida correctamente: {image_path} (zoom={zoom})")
+    
+    # Extraer parámetros de configuración de la leyenda
+    # Lista de parámetros que sabemos que son compatibles con la leyenda de matplotlib
+    valid_params = [
+        'loc', 'bbox_to_anchor', 'ncol', 'fontsize', 'frameon', 'title',
+        'borderpad', 'labelspacing', 'handlelength', 'handleheight',
+        'handletextpad', 'borderaxespad', 'columnspacing', 'facecolor',
+        'edgecolor', 'framealpha', 'shadow', 'fancybox'
+    ]
+    
+    # Filtrar solo los parámetros válidos
+    legend_params = {}
+    for param in valid_params:
+        if param in legend_config:
+            legend_params[param] = legend_config[param]
+    
+    # Guardar el título para después
+    title = legend_params.get('title')
+    title_fontsize = legend_config.get('title_fontsize')
+    title_fontweight = legend_config.get('title_fontweight')
+    
+    print(f"🔍 Parámetros filtrados para la leyenda: {legend_params}")
+    
+    # Añadir leyenda con handlers personalizados
+    legend = ax.legend(handles, labels, handler_map=handler_map, **legend_params)
+    
+    # Configurar el título de la leyenda después de crearla
+    if legend and title:
+        title_obj = legend.get_title()
+        if title_obj:
+            if title_fontsize:
+                title_obj.set_size(title_fontsize)
+            if title_fontweight:
+                title_obj.set_weight(title_fontweight)
+    
+    return legend
+
+def add_logo_above_legend(fig, ax, logo_config):
+    """
+    Añade un logo encima de la leyenda o en una posición personalizada.
+    
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure
+        La figura donde se añadirá el logo
+    ax : matplotlib.axes.Axes
+        El eje para las coordenadas y la leyenda
+    logo_config : dict
+        Configuración del logo incluyendo 'path', 'position', 'zoom', etc.
+        
+    Returns
+    -------
+    matplotlib.offsetbox.AnnotationBbox or None
+        El objeto de anotación creado, o None si hubo un error
+    """
+    if not logo_config or not logo_config.get("path"):
+        return None
+        
+    logo_path = logo_config.get("path")
+    if not Path(logo_path).exists():
+        print(f"⚠️ No se encontró el archivo de logo: {logo_path}")
+        return None
+    
+    zoom = logo_config.get("zoom", 0.15)
+    position = logo_config.get("position", "custom")
+    margin = logo_config.get("margin", 0.02)  # Margen entre logo y leyenda
+    
+    # Cargar logo
+    from matplotlib.image import imread
+    img = imread(logo_path)
+    imagebox = OffsetImage(img, zoom=zoom)
+    
+    # Determinar posición
+    x, y = 0.9, 0.9  # Posición predeterminada
+    
+    if position == "above_legend":
+        legend = ax.get_legend()
+        if legend:
+            bbox = legend.get_window_extent().transformed(fig.transFigure.inverted())
+            x = (bbox.x0 + bbox.x1) / 2
+            y = bbox.y1 + margin
+        else:
+            print("⚠️ Se solicitó logo sobre leyenda pero no hay leyenda visible.")
+            position = "custom"  # Fallback a posición personalizada
+    
+    if position == "custom":
+        x = logo_config.get("x", x)
+        y = logo_config.get("y", y)
+    
+    # Añadir logo
+    ab = AnnotationBbox(
+        imagebox,
+        (x, y),
+        frameon=False,
+        box_alignment=(0.5, 0.0),  # Centrado horizontalmente, abajo verticalmente
+        pad=0,
+        xycoords='figure fraction',
+        annotation_clip=False
+    )
+    fig.add_artist(ab)
+    
+    return ab

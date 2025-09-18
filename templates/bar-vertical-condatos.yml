@@ -1,0 +1,196 @@
+# Template para gráficos de barras verticales con estructura consistente con stackedbarh
+
+# Configuración general
+title: "Título"
+subtitle: "Subtítulo descriptivo"
+xlabel: ""
+ylabel: ""
+style: "styles/condatos.mplstyle"
+dpi: 300
+formats: ["png", "svg", "pdf", "webp", "jpg"]
+jpg_quality: 92
+webp_quality: 92
+scour_svg: true
+
+# Dimensiones base de la figura
+width_in: 8.0
+height_in: 6.0
+
+# Configuración de márgenes
+margins:
+  auto_adjust: false   # Ajuste automático del margen en barras verticales es menos crítico
+  left: 0.10           # Margen izquierdo
+  right: 0.02          # Margen derecho
+  top: 0.25            # Margen superior (altura del header)
+  bottom: 0.18         # Margen inferior - aumentado para evitar solapamiento con footer
+
+# Configuración de espaciado de título y subtítulo
+title_spacing:
+  top_margin: 0.15           # 15% de espacio desde el borde superior
+  bottom_margin: 0.10        # 10% entre título y subtítulo
+  subtitle_top_margin: 0.05  # 5% adicional antes del subtítulo
+  subtitle_bottom_margin: 0.10 # 10% debajo del subtítulo
+
+# Configuración de autoajuste
+autosize:
+  enabled: true
+  width_per_col: 0.7       # Ancho por columna para barras verticales
+  min_width: 8
+  max_width: 12
+
+# Ordenar datos
+sort_by_value: true  # Ordenar de mayor a menor por valor
+
+# Título y subtítulo - Configuración básica
+title_font_size: 18          # Tamaño base para el título
+title_font_weight: "bold"    # Negrita para mejor visibilidad
+title_color: "#333333"
+title_font_family: "Nunito"  
+title_font_style: "normal"
+title_x_position: 0.5        # Centrado horizontalmente
+title_horizontal_alignment: "center"  # Opciones: left, center, right
+title_vertical_alignment: "top"       # Siempre usar 'top' para posicionamiento coherente
+
+subtitle_font_size: 14       # Tamaño base para el subtítulo
+subtitle_color: "#666666"
+subtitle_font_family: "Nunito"  
+subtitle_font_style: "italic"   # Itálica para diferenciar del título
+subtitle_x_position: 0.5
+subtitle_horizontal_alignment: "center"
+subtitle_vertical_alignment: "top"  # Siempre usar 'top' para posicionamiento coherente
+
+# Configuración avanzada del título (tiene precedencia sobre los valores básicos)
+title_config:
+  x: 0.5
+  ha: "center"
+  fontsize: 18              # Tamaño del título (en puntos)
+  fontweight: "bold"        # Negrita
+  color: "#333333"          # Color del texto
+  style: "normal"           # Estilo normal
+  linespacing: 1.2
+  word_wrap: true           # Habilitar ajuste de texto para títulos largos
+  width: 0.85               # Ancho máximo como fracción del ancho disponible
+
+# Configuración avanzada del subtítulo (tiene precedencia sobre los valores básicos)
+subtitle_config:
+  x: 0.5
+  ha: "center"
+  fontsize: 14              # Tamaño del subtítulo (en puntos)
+  color: "#666666"          # Color del texto
+  style: "italic"           # Estilo itálica para distinguir del título
+  linespacing: 1
+  wrap: true                # Habilitar ajuste de texto
+
+# Configuración de barras
+bar:
+  width: 0.75               # Ancho de las barras
+  color: "#1F6FEB"          # Color predeterminado
+  edgecolor: "#FFFFFF"      # Color del borde
+  linewidth: 0.5            # Grosor del borde
+
+# Colores disponibles
+palette: ["#1F6FEB", "#00B5D8", "#F25F5C", "#F2C14E", "#6B7280", "#111827"]
+
+# Etiquetas del eje X cuando están rotadas
+rotate_xticks: 0             # 0 grados por defecto (sin rotación)
+xtick_config:
+  ha: "right"                # Alineación horizontal: right, center, left
+  bottom_space: 0.18         # Espacio inferior para etiquetas rotadas
+  adjust_for_long_labels: true  # Aplicar ajuste adicional para etiquetas largas
+
+# Etiquetas dentro de las barras
+value_labels: true
+value_format: ".1f"           # Formato decimal con 1 posición
+
+# Configuración avanzada de etiquetas dentro de las barras
+value_labels_config:
+  font_size: 9               # Tamaño de fuente para las etiquetas de valores
+  font_weight: "normal"      # Peso de la fuente: normal, bold
+  va: "bottom"               # Alineación vertical: bottom, inside, top
+  padding: 3                 # Padding en puntos
+  color: "black"             # Color para etiquetas fuera de la barra
+  color_inside: "white"      # Color para etiquetas dentro de la barra
+
+# Etiquetas de totales (en caso de usarse)
+total_labels:
+  enabled: false             # Desactivado por defecto en barras simples
+  y_offset: 1                # Distancia desde el tope de la barra (en puntos)
+  font_size: 10              # Tamaño de fuente para las etiquetas de totales
+  font_weight: "bold"        # Peso de la fuente: normal, bold
+  color: "#333333"           # Color del texto
+  format: "{:.0f}"           # Formato para los valores totales
+
+# Configuración del eje X
+xaxis:
+  show_ticks: true           # Mostrar los valores numéricos del eje X
+  show_labels: true          # Mostrar las etiquetas de texto del eje X
+  font:
+    size: 9
+    color: "#333333"
+
+# Configuración del eje Y
+yaxis:
+  show_ticks: true           # Mostrar los valores numéricos del eje Y
+  show_labels: true          # Mostrar las etiquetas de texto del eje Y
+  font:
+    size: 9
+    color: "#333333"
+
+# Configuración de leyenda básica (modo simple)
+legend: false                # Desactivada por defecto en barras simples
+legend_loc: "upper right"    # Posición por defecto
+
+# Configuración avanzada de leyenda
+legend_config:
+  loc: "upper right"         # Posición general
+  bbox_to_anchor: [0.98, 0.98]  # Coordenadas precisas [x, y] donde se ancla la leyenda
+  ncol: 1                    # Número de columnas para organizar los elementos
+  fontsize: 9                # Tamaño de fuente para las etiquetas
+  frameon: true              # Mostrar borde alrededor de la leyenda
+  facecolor: "#ffffff"       # Color de fondo de la leyenda
+  edgecolor: "#dddddd"       # Color del borde de la leyenda
+  framealpha: 0.9            # Transparencia del fondo (0-1)
+  fancybox: true             # Bordes redondeados
+
+# Grid
+grid: true                   # Mostrar grid por defecto
+
+# Footer
+footer:
+  # Configuración general del footer
+  config:
+    y_position: 0.08         # Posición vertical del footer (aumentado)
+    show_frame: false        # No mostrar un marco para el footer
+    spacing: 0.025          # Espacio vertical entre elementos del footer
+  
+  # Texto de fuente principal
+  source: "Fuente: ConDatos 2025"
+  source_config:
+    fontsize: 10             # Tamaño aumentado para mejor legibilidad
+    color: "#666666"
+    style: "italic"
+    weight: "normal"
+    family: "Nunito"
+    x_position: 0.15
+    y_position: 0.11         # Posición vertical más elevada
+    alignment: "left"        # Alineación explícita
+
+  # Texto de copyright/licencia como nota
+  note: "© 2025 ConDatos - CC BY 4.0"
+  note_config:
+    fontsize: 8              # Tamaño más pequeño para el copyright
+    color: "#999999"         # Color gris más claro para el copyright
+    style: "normal"
+    weight: "normal"
+    family: "Nunito"
+    x_position: 0.15         # Misma posición horizontal que la fuente
+    y_position: 0.08         # Posición vertical debajo de la fuente
+    alignment: "left"        # Alineación a la izquierda
+
+  # Soporte para múltiples logos
+  logos:
+    - path: "assets/logos/logo_condatos.png"
+      zoom: 0.06              # Tamaño más reducido del logo
+      x_position: 0.85
+      y_position: 0.09        # Posición vertical del logo (ajustada)
+      alignment: "right"      # Alineación ("right", "left", "center")

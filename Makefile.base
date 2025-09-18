@@ -1,0 +1,59 @@
+# Makefile.base - Funcionalidad compartida para Makefiles del proyecto
+# Este archivo implementa la funcionalidad básica compartida por todos los Makefiles
+
+SHELL := /bin/bash
+
+# ---------- Ajustes del proyecto ----------
+ENV_NAME        ?= condatos-figs-app
+PYTHON          ?= $(shell which python || which python3)
+CONFIG_DIR      ?= config
+OUT_DIR         ?= out
+
+# ---------- Utilidad Básica ----------
+.PHONY: help-base
+help-base:
+	@echo "Targets base disponibles:"
+	@echo "  setup-env     - Sugerencia para activar conda"
+	@echo "  check-env     - Muestra el intérprete Python actual"
+	@echo "  clean         - Borra artefactos en $(OUT_DIR)"
+
+# ---------- Setup / Info ----------
+.PHONY: setup-env check-env
+setup-env:
+	@echo "Activa el entorno conda:  conda activate $(ENV_NAME)"
+	@echo "Luego selecciona el intérprete en VS Code si es necesario."
+
+check-env:
+	@echo "Python ejecutable: $(PYTHON)"
+	@$(PYTHON) -c 'import sys; print("sys.executable ->", sys.executable)'
+
+# ---------- Función para ejecutar un comando Python ----------
+# Este patrón define cómo se debe invocar Python consistentemente
+define run_python
+	conda run -n $(ENV_NAME) $(PYTHON) -m $(1) $(2)
+endef
+
+# ---------- Limpieza ----------
+.PHONY: clean
+clean:
+	@rm -f $(OUT_DIR)/*.{png,svg,pdf,webp,avif,jpg} $(OUT_DIR)/*.tmp.png 2>/dev/null || true
+
+# ---------- Calidad de código ----------
+.PHONY: lint-base fmt-base test-base
+lint-base:
+	@ruff check .
+
+fmt-base:
+	@ruff format .
+	@ruff check . --fix
+
+test-base:
+	@if [ -d tests ]; then \
+		echo ">> Ejecutando pytest"; \
+		pytest -q; \
+	else \
+		echo ">> No hay carpeta tests/ — saltando"; \
+	fi
+
+# Herencia: los Makefiles que incluyan este archivo pueden extender estos targets
+# Ejemplo: `lint: lint-base ; echo "Lint adicional..."`

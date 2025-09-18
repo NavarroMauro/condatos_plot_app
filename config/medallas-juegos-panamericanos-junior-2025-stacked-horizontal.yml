@@ -1,145 +1,229 @@
 # Configuración para gráfico de medallas - Juegos Panamericanos Junior 2025
-# Configuración específica de la leyenda para este gráfico
-legend_config:
-  # POSICIONAMIENTO DE LA LEYENDA
-  loc: "lower right"      # Posición general: qué esquina/borde de la leyenda se ancla a las coordenadas de bbox_to_anchor
-  bbox_to_anchor: [0.98, 0.02]  # Coordenadas precisas [x, y] donde se ancla la leyenda (x=0.98→derecha, y=0.02→abajo)
-  
-  # FORMATO DE LA LEYENDA
-  ncol: 3                 # Número de columnas para organizar los elementos de la leyenda
-  fontsize: 22            # Tamaño de fuente para los elementos de la leyenda
-  title: "Medallas"       # Texto del título que aparece sobre la leyenda
-  title_fontsize: 24      # Tamaño de fuente para el título de la leyenda
-  title_fontweight: "bold"  # Peso de la fuente para el título de la leyendan que utiliza template stackedbar-horizontal-condatos.yml
+# -----------------------------------------------------------------------------
 
 # Archivo de salida y datos
 outfile: "out/medallas-juegos_panamericanos_junior_2025-simple"
-template: "templates/stackedbar-horizontal-condatos.yml"
-style: "styles/minimal.mplstyle"   # Estilo minimalista moderno
+template: "templates/stackedbar-horizontal-template.yml"
+style: ["styles/minimal.mplstyle"]   # Estilo minimalista moderno
 
 # Datos de entrada
 data:
   csv: data/medallas-juegos-panamericanos-junior-2025.csv
   category_col: "pais"
 
-# Configuración personalizada de márgenes para este gráfico en específico
-margins:
-  top: 0.15           # Margen superior reducido para acercar el gráfico al subtítulo
-  bottom: 0.15        # Margen inferior para dar espacio al footer
-  text_padding: 0.15  # Un poco más de espacio después del texto
-  min_left: 0.3      # Mínimo margen izquierdo
-
 # Configuración de series específica para este dataset
 series_order: ["oro", "plata", "bronce"]
 
-# Título y subtítulo específicos para este gráfico
-title: "Medallas por país - Juegos Panamericanos Junior Asunción 2025"
-subtitle: "Total de preseas ganadas (oro, plata y bronce) en los Juegos Panamericanos Junior 2025"
+# Título y subtítulo
+title: "Medallero Juegos Panamericanos Junior 2025 - Asunción, Paraguay"
+subtitle: "En total se entregaron 1.050 medallas: 330 de oro, 321 de plata y 399 de bronce."
 
-# Configuración de espaciado específica para estos títulos
-title_spacing:
-  top_margin: 0.35       # 35% de espacio desde el borde superior (mantenemos igual)
-  bottom_margin: 0.25    # 25% entre título y subtítulo (aumentado)
-  subtitle_top_margin: 0.10  # 10% adicional para separar el subtítulo del título (aumentado)
-  subtitle_bottom_margin: 0.00  # 0% de espacio debajo del subtítulo (mantenemos igual)
+# Opciones generales para la figura
+figure_spacing: 0.15     # Espacio adicional entre elementos principales
 
-# Ordenar datos - invertir el orden para mostrar de menor a mayor
-invert_order: true   # Invertir el orden (de menor a mayor)
-
-# Sobrescribir tamaño de fuente del título y subtítulo para este gráfico
+# Configuración avanzada del título (posicionamiento absoluto)
 title_config:
-  fontsize: 42            # Tamaño de fuente para el título (ajustado)
-  width: 0.98             # Ancho máximo como fracción del eje (ampliado al máximo)
-  padding_left: 0.01      # Padding izquierdo reducido
-  padding_right: 0.01     # Padding derecho reducido
-  word_wrap: true         # Habilitar ajuste de texto para títulos largos
-  ha: "center"            # Centrar horizontalmente
-  x: 0.4                  # Posición X central 
+  fontsize: 52           # Tamaño grande para el título
+  fontweight: "bold"
+  color: "#333333"
+  ha: "center"           # Alineado al centro
+  x: 0.5                 # Posición horizontal (0.5 = centro de la figura)
+  y: 0.94                # Posición Y explícita para el título (bajada ligeramente para que funcione con center)
+  va: "center"           # Alineación vertical para centrar el texto en la coordenada Y
+  family: "Nunito"
+  style: "normal"
+  wrap: true
+  width: 1            # Usar 100% del ancho disponible
+  transform: "figure"    # Usar coordenadas de figura completas en lugar del eje de título
 
+# Configuración avanzada del subtítulo (posicionamiento absoluto)
 subtitle_config:
-  fontsize: 28            # Tamaño de fuente para el subtítulo (aumentado)
-  width: 0.98             # Ancho máximo como fracción del eje (ampliado al máximo)
-  padding_left: 0.03      # Padding izquierdo reducido
-  padding_right: 0.03     # Padding derecho reducido
-  word_wrap: true         # Habilitar ajuste de texto para subtítulos largos
-  ha: "center"            # Centrar horizontalmente
-  x: 0.5                  # Posición X central
+  fontsize: 32           # Tamaño ajustado para el subtítulo
+  color: "#666666"
+  ha: "center"           # Alineado al centro
+  x: 0.5                 # Posición horizontal (0.5 = centro de la figura)
+  y: 0.83                # Posición Y forzada manualmente (aún más arriba, más cerca del título)
+  va: "top"              # Alineación vertical para usar la coordenada como referencia superior
+  family: "Nunito"
+  style: "italic"
+  wrap: true
+  width: 1.00             # Usar 100% del ancho disponible
+  transform: "figure"    # Usar coordenadas de figura completas
 
-# Configuración de autoajuste específica para este gráfico
+# Configuración de espaciado para título y subtítulo
+title_spacing:
+  top_margin: 0.15        # Reducido aún más para subir el título más arriba
+  bottom_margin: 0.05     # Ligeramente reducido para ajustar el balance
+  subtitle_top_margin: 0.08  # Aumentado para mayor separación entre título y subtítulo
+  subtitle_bottom_margin: 0.02  # Mantener el amplio espacio entre subtítulo y gráfico
+  left_margin: 0.00       # Margen izquierdo para título/subtítulo
+  right_margin: 0.00      # Margen derecho para título/subtítulo
+
+# Configuración de márgenes del gráfico
+margins:
+  top: 0.27              # Aumentado para dar más espacio entre el subtítulo y el gráfico
+  bottom: 0.20           # Margen inferior aumentado para el footer
+  text_padding: 0.00     # Sin padding de texto
+  left: 0.28             # Espacio para nombres de países
+  right: 0.08            # Margen derecho mínimo
+  auto_adjust: false     # No ajustar automáticamente
+  min_left: 0.30         # Mínimo margen izquierdo
+
+# Ordenar datos
+invert_order: true       # Invertir orden (de menor a mayor)
+sort_by_column: "oro"    # Ordenar por la columna 'oro' (cantidad de oros)
+
+# Configuración de autoajuste
 autosize:
-  height_per_row: 0.8     # Espacio entre filas
-  min_height: 18          # Aumentado para asegurar que el gráfico tenga suficiente altura
-  max_height: 35          # Aumentado para permitir más espacio total
-  add_height_ratio: 0.05  # Añadir 5% más de altura (reducido del 15% original)
+  height_per_row: 0.3    # Espacio entre filas (reducido para un diseño más compacto)
+  min_height: 15         # Altura mínima reducida (era 20)
+  max_height: 22         # Altura máxima reducida (era 30)
+  add_height_ratio: 0.12 # Añadir 12% de altura extra (reducido de 15%)
 
-# Configuración de barras específica para este gráfico
+# Configuración de barras
 bar:
-  height: 1.0             # Aumentado para hacer las barras más anchas visualmente
-  linewidth: 0.5          # Grosor del borde
-  edgecolor: "#ffffff"    # Color blanco para los bordes
-  gap: 0.08               # Espacio entre barras (8% de la altura)
+  height: 0.9            # Altura relativa de cada barra (mayor para barras más gruesas)
+  linewidth: 0.5         # Grosor del borde de las barras en puntos
+  edgecolor: "#ffffff"   # Color del borde (blanco)
+  gap: 0.06              # Espacio entre barras mínimo pero visible
 
-# Colores personalizados para este gráfico - paleta para tema minimalista
-colors:
-  oro: "#F28E2B"          # Dorado minimalista
-  plata: "#4E79A7"        # Azul minimalista
-  bronce: "#E15759"       # Rojo-naranja minimalista
+# Colores personalizados
+  colors:
+    oro: "#A4841C"         # Dorado oscuro para mejor contraste
+    plata: "#7A7A7A"       # Plata más oscura para mejor contraste
+    bronce: "#CD7F32"      # Rojo-naranja
 
-# Configuración de etiquetas de totales específica para este gráfico
+# Configuración de etiquetas de totales
 total_labels:
-  x_offset: 8             # Offset personalizado
-  font_size: 12           # Tamaño de fuente personalizado
+  enabled: true          # Activar etiquetas de totales
+  position: "end"        # Mostrar al final de las barras
+  x_offset: 4            # Offset horizontal
+  font_size: 14          # Tamaño de fuente (reducido)
+  color: "#222222"       # Color oscuro para mejor contraste
+  value_format: "{:.0f}" # Formato sin decimales
 
-# Configuración del eje Y específica para este gráfico
+# Configuración del eje Y
 yaxis:
-  show_ticks: false       # Ocultar los valores numéricos del eje Y
-  show_labels: true      # Ocultar las etiquetas de texto del eje Y
+  show_ticks: false      # Ocultar valores numéricos
+  show_labels: true      # Mostrar etiquetas de texto
+  label_padding: 55      # Padding para las etiquetas
+  position: "left"       # Posición de las etiquetas
   font:
-    family: "sans-serif"  # Familia de fuente específica
-    size: 18              # Tamaño reducido para nombres largos
+    family: "Nunito"     # Fuente
+    size: 18              # Tamaño reducido (era 18)
+    color: "#000000"     # Color negro
 
-# (Configuración de la leyenda definida al principio del archivo)
+# Configuración del eje X
+xaxis:
+  show_ticks: false      # Ocultar valores numéricos
+  show_labels: false     # Ocultar etiquetas de texto
+  hide_axis: true        # Ocultar eje completamente
+  hide_spines: true      # Ocultar bordes del eje
 
-# Footer personalizado para este gráfico específico
+# Configuración de leyenda
+legend_config:
+  # Posición y layout
+  loc: "upper right"
+  bbox_to_anchor: [0.98, 0.3]
+  ncol: 1
+  custom_icons: true
+  use_direct_drawing: true
+  preserve_alpha: true
+  show_totals_in_legend: false  # Mostrar el total de medallas junto al nombre en la leyenda
+  icons:
+    - label: "Oro"
+      image: "assets/icons/medal.png"
+      zoom: 0.2
+      circle_scale: 1  # Escala del círculo de fondo
+      label_fontsize: 22  # Tamaño de fuente del label
+      tint: oro
+    - label: "Plata"
+      image: "assets/icons/medal.png"
+      zoom: 0.2
+      circle_scale: 1  # Escala del círculo de fondo
+      label_fontsize: 22  # Tamaño de fuente del label
+      tint: plata
+    - label: "Bronce"
+      image: "assets/icons/medal.png"
+      zoom: 0.2
+      circle_scale: 1  # Escala del círculo de fondo
+      label_fontsize: 22  # Tamaño de fuente del label
+      tint: bronce
+  item_spacing: 0.09      # Espaciado real entre elementos (custom legend)
+  
+  # Título de la leyenda
+  title: "Medallas entregadas"      # Texto del título de la leyenda (dejar vacío para omitir)
+  title_fontsize: 24     # Tamaño de fuente del título
+  title_fontweight: "normal"  # Peso del título ("normal", "bold")
+  
+  Opciones adicionales disponibles para el marco:
+  facecolor: "#f9f9f9" # Color de fondo de la leyenda
+  edgecolor: "#cccccc" # Color del borde de la leyenda
+  shadow: true        # Efecto de sombra
+
+# Footer personalizado
 footer:
-  # Configuración específica del footer
+  # Configuración general del área del footer
   config:
-    y_position: 0.05      # Posición vertical personalizada
-    show_frame: false     # Sin marco para este gráfico específico
-
-  # Texto de fuente personalizado para este gráfico
-  source: "Fuente: Web Comité Olímpico Panamericano, 2025"
+    y_position: 0.07     # Posición base vertical del footer incrementada (coordenadas de 0 a 1)
+    spacing: 0.03        # Espaciado vertical entre elementos de texto en el footer incrementado
+    
+    # Configuración del diseño del área del footer
+    frame_color: "#f0f0f0" # Color de fondo del área del footer (formato hex)
+    frame_alpha: 0.1     # Transparencia del fondo (0=invisible, 1=sólido)
+    frame_padding: 0.01  # Espacio adicional alrededor del contenido del footer
+    
+    # Configuración adicional para desactivar sistemas de branding
+    use_default_branding: false  # Desactivar el sistema de branding estándar
+  
+  # Desactivar fecha automática (directamente en la raíz del footer)
+  date_auto: false     # Desactivar la fecha automática que se añade al footer
+  
+  # Texto de fuente/atribución
+  source: "Fuente: Web oficial Juegos Panamericanos Junior, Asunción Paraguay. Nota: se muestran solo países con ≥ 6 medallas. Los demás países obtuvieron entre 1 y 5 medallas (Bahamas, Panamá, Nicaragua, Islas Vírgenes de EE. UU., Bermudas, El Salvador, Guyana, Aruba, Islas Caimán, Granada, Islas Vírgenes Británicas, Dominica, Haití, Barbados y Costa Rica."
   source_config:
-    fontsize: 18          # Tamaño personalizado
-    x_position: 0.15
-    width: 0.30           # Ancho máximo personalizado
-
-  # Texto de nota/licencia personalizado
+    fontsize: 14         # Tamaño de fuente en puntos
+    x_position: 0.10     # Posición horizontal (0=izquierda, 1=derecha)
+    y_position: 0.15     # Posición vertical aumentada (0=abajo, 1=arriba)
+    alignment: "left"    # Alineación del texto ("left", "center", "right")
+    width: 0.7           # Ancho máximo del texto como fracción del ancho total
+    family: "Nunito"     # Familia de fuente
+    style: "normal"      # Estilo ("normal", "italic")
+  
+  # Texto de nota/licencia 
   note: "Licencia CC BY-NC-SA 4.0"
   note_config:
-    fontsize: 18          # Tamaño personalizado
-    x_position: 0.5
-
-  # Logo específico para este gráfico
+    fontsize: 22         # Tamaño de fuente en puntos
+    x_position: 0.10     # Posición horizontal (0=izquierda, 1=derecha)
+    y_position: 0.07     # Posición vertical aumentada (debe coincidir con y_position del config)
+    alignment: "left"    # Alineación del texto ("left", "center", "right")
+    color: "#666666"     # Color del texto (formato hex)
+    family: "Nunito"     # Familia de fuente
+    style: "normal"      # Estilo ("normal", "italic")
+    fontweight: "bold"   # Peso de fuente ("normal", "bold")
+    width: 0.40          # Ancho máximo del texto como fracción del ancho total
+  
+  # Configuración de logos
   logos:
-    - path: "assets/logo_condatos.png"
-      size_method: "fraction"
-      width_fraction: 0.10  # 10% del ancho de la figura
-      x_position: 0.85
+    - path: "assets/logo_condatos.png"  # Ruta al archivo de imagen
+      size_method: "fraction"           # Método de dimensionamiento ("fraction", "absolute")
+      width_fraction: 0.16              # Ancho como fracción del ancho de la figura
+      x_position: 0.85                  # Posición horizontal (0=izquierda, 1=derecha)
+      y_position: 0.08                  # Posición vertical aumentada (debe coincidir con y_position del note)
 
-# Configuración de banderas específica para este gráfico
+# Configuración de banderas
 flags:
-  enabled: true           # Activar el uso de banderas
-  position: "end"         # Posición de las banderas al final de la barra
-  zoom: 0.12              # Tamaño personalizado de las banderas
-  show_axis_labels: true  # Mostrar los nombres de los países en el eje Y
+  enabled: true          # Activar banderas
+  position: "start"      # Posición de banderas
+  zoom: 0.12             # Tamaño
+  show_axis_labels: true # Mostrar nombres de países
+  offset: 0.023          # Offset
 
-# Configuración para ocultar el eje X
-xaxis:
-  show_ticks: false       # Ocultar los valores numéricos del eje X
-  show_labels: false      # Ocultar las etiquetas de texto del eje X
-  hide_axis: true         # Ocultar completamente la línea del eje X y todos los elementos
-  hide_spines: true       # Ocultar los bordes del eje X
+# Configuración de etiquetas de valores individuales
+value_labels:
+  font_size: 14           # Tamaño de fuente reducido para las etiquetas de valores
+  font_weight: "normal"  # Peso de fuente normal
+  color: "#ffffff"       # Color blanco para contraste sobre las barras
 
 # Activar mensajes de depuración
 debug: true

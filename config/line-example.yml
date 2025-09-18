@@ -1,0 +1,68 @@
+# Ejemplo de configuración para gráfico de líneas
+# Nombre: line-example.yml
+
+# Usar el template de gráfico de líneas
+template: "templates/linechart-condatos.yml"
+
+# Personalizar el título y subtítulo para este gráfico específico
+title: "Ejemplo de Gráfico de Líneas"
+subtitle: "Datos de ejemplo para probar la funcionalidad"
+
+# Datos de ejemplo (inline)
+data:
+  inline:
+    fecha: ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10"]
+    valor1: [10, 15, 13, 18, 20, 17, 22, 27, 25, 30]
+    valor2: [5, 8, 12, 10, 14, 16, 13, 19, 22, 25]
+
+# Mapeo de columnas para el gráfico
+data_source:
+  column_mapping:
+    x: "fecha"
+    series:
+      - name: "Serie A"
+        column: "valor1"
+        color: "#1A535C"
+      - name: "Serie B"
+        column: "valor2"
+        color: "#FF6B6B"
+
+# Personalizar aspectos visuales específicos para este gráfico
+linechart:
+  linewidth: 3
+  marker:
+    enabled: true
+    size: 7
+    edgewidth: 1.5
+
+# Destacar áreas de interés en el gráfico
+annotations:
+  regions:
+    - label: "Periodo de interés"
+      from: "2023-04"
+      to: "2023-07"
+      color: "#f8f8f8"
+      alpha: 0.3
+
+# Personalizar etiquetas de valores para este gráfico
+value_labels:
+  show: true
+  format: "{:.0f}"
+  fontsize: 9
+  only_last: true
+  background: true
+
+# Configuración de los ejes
+xaxis:
+  title: "Mes"
+  title_fontsize: 12
+  title_fontweight: "bold"
+
+yaxis:
+  title: "Valor"
+  title_fontsize: 12
+  title_fontweight: "bold"
+
+# Personalizar la fuente para este gráfico específico
+footer:
+  source: "Fuente: Datos de ejemplo, 2023"

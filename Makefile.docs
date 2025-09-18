@@ -1,0 +1,56 @@
+# Variables
+SHELL := /bin/bash
+ENV_NAME        ?= condatos-figs-app
+PYTHON          ?= $(shell which python || which python3)
+SITE_DIR        ?= site
+MKDOCS_PORT     ?= 8000
+
+# Configuración de Conda
+CONDA_RUN       := conda run -n $(ENV_NAME)
+CONDA_RUN_PY    := $(CONDA_RUN) $(PYTHON)
+
+# Objetivos principales
+.PHONY: docs docs-serve docs-build docs-clean docs-deploy docs-install docs-help
+
+# Objetivo principal para documentación
+docs: docs-help
+
+# Instalar dependencias para la documentación
+docs-install:
+	@echo "==> Instalando dependencias para la documentación"
+	$(CONDA_RUN) pip install mkdocs mkdocs-material mkdocstrings
+
+# Iniciar servidor de desarrollo para la documentación
+docs-serve:
+	@echo "==> Iniciando servidor de desarrollo para la documentación en puerto $(MKDOCS_PORT)"
+	$(CONDA_RUN) mkdocs serve -a localhost:$(MKDOCS_PORT)
+
+# Construir la documentación estática
+docs-build:
+	@echo "==> Construyendo la documentación estática"
+	$(CONDA_RUN) mkdocs build -d $(SITE_DIR)
+
+# Limpiar los archivos generados
+docs-clean:
+	@echo "==> Limpiando archivos generados de la documentación"
+	rm -rf $(SITE_DIR)
+	@echo "==> Archivos de documentación limpiados"
+
+# Desplegar la documentación (GitHub Pages)
+docs-deploy:
+	@echo "==> Desplegando la documentación en GitHub Pages"
+	$(CONDA_RUN) mkdocs gh-deploy --force
+
+# Mostrar ayuda sobre los comandos de documentación
+docs-help:
+	@echo "Comandos de documentación para ConDatos-Figs-App:"
+	@echo "  make docs-install   - Instalar dependencias para la documentación"
+	@echo "  make docs-serve     - Iniciar servidor de desarrollo para la documentación"
+	@echo "  make docs-build     - Construir la documentación estática"
+	@echo "  make docs-clean     - Limpiar los archivos generados"
+	@echo "  make docs-deploy    - Desplegar la documentación en GitHub Pages"
+	@echo "  make docs-help      - Mostrar esta ayuda"
+	@echo ""
+	@echo "Opciones configurables:"
+	@echo "  MKDOCS_PORT=8080    - Cambiar el puerto del servidor de desarrollo (predeterminado: 8000)"
+	@echo "  SITE_DIR=docs_site  - Cambiar el directorio de salida para la documentación estática"

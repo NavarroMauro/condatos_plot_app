@@ -59,36 +59,74 @@ class StackedHorizontalBarChart(BaseChart):
         # Determinar columnas para las series
         self.cols = self._get_series_columns()
         
+        # Aplicar filtrado por valor mínimo si está configurado
+        filter_min_value = self.params.get("chart", {}).get("filter_min_value", None)
+        
+        if filter_min_value is not None and filter_min_value > 0:
+            print(f"🔍 Aplicando filtro de valor mínimo: {filter_min_value}")
+            # Calcular totales antes de filtrar para mensajes informativos
+            pre_filter_len = len(self.df)
+            
+            # Crear una columna de totales temporalmente para el filtrado
+            temp_df = self.df.copy()
+            temp_df['_temp_total'] = temp_df[self.cols].sum(axis=1)
+            
+            # Filtrar usando el método de la clase base
+            self.df = self.filter_by_threshold(
+                temp_df, 
+                total_column='_temp_total', 
+                threshold=filter_min_value, 
+                category_column=self.cat_col
+            )
+            
+            # Eliminar la columna temporal
+            self.df.drop('_temp_total', axis=1, inplace=True)
+            
+            post_filter_len = len(self.df)
+            if pre_filter_len > post_filter_len:
+                print(f"✅ Filtrado completado: Quedaron {post_filter_len} de {pre_filter_len} elementos.")
+        
         # Preparar matriz de datos
         self.M = np.vstack([self.df[c].astype(float).to_numpy() for c in self.cols])
         
-        # Calcular totales por categoría para ordenamiento
+        # Calcular totales por categoría para ordenamiento (por defecto suma de todas las series)
         self.totals = self.M.sum(axis=0)
-        
-        # Ordenar datos según total
-        if self.params.get("sort_by_total", True):
-            # Verificar si se debe invertir el orden
+        # Permitir columna de ordenamiento personalizada
+        sort_by_column = self.params.get("sort_by_column")
+        if sort_by_column is not None:
+            # Ordenar por la columna especificada
+            if sort_by_column not in self.df.columns:
+                raise KeyError(f"La columna para ordenar '{sort_by_column}' no existe en el DataFrame. Columnas disponibles: {list(self.df.columns)}")
+            sort_values = self.df[sort_by_column].astype(float).to_numpy()
             invert_order = self.params.get("invert_order", False)
-            
-            # Índices ordenados: si invert_order es True, ordenamos de menor a mayor
             if invert_order:
-                sorted_indices = np.argsort(self.totals)  # Orden ascendente (de menor a mayor)
-                print("🔄 Aplicando orden ASCENDENTE (de menor a mayor)")
+                sorted_indices = np.argsort(sort_values)
+                print(f"🔄 Aplicando orden ASCENDENTE (de menor a mayor) por columna '{sort_by_column}'")
             else:
-                sorted_indices = np.argsort(-self.totals)  # Orden descendente (de mayor a menor)
-                print("🔄 Aplicando orden DESCENDENTE (de mayor a menor)")
-            
-            # Aplicar ordenamiento a datos y nombres
+                sorted_indices = np.argsort(-sort_values)
+                print(f"🔄 Aplicando orden DESCENDENTE (de mayor a menor) por columna '{sort_by_column}'")
             self.M = self.M[:, sorted_indices]
             self.totals = self.totals[sorted_indices]
             self.cats = [self.df[self.cat_col].astype(str).tolist()[i] for i in sorted_indices]
-            
-            # Imprimir información de depuración sobre las categorías
             print("📊 Primeros 5 nombres de países después de ordenar:")
             for i, cat in enumerate(self.cats[:5]):
                 print(f"  - {i+1}: {cat}")
-            
-            # Guardar el dataframe ordenado para uso posterior
+            self.df = self.df.iloc[sorted_indices].reset_index(drop=True)
+        # Si no se especifica columna, usar el comportamiento anterior (por total)
+        elif self.params.get("sort_by_total", True):
+            invert_order = self.params.get("invert_order", False)
+            if invert_order:
+                sorted_indices = np.argsort(self.totals)
+                print("🔄 Aplicando orden ASCENDENTE (de menor a mayor)")
+            else:
+                sorted_indices = np.argsort(-self.totals)
+                print("🔄 Aplicando orden DESCENDENTE (de mayor a menor)")
+            self.M = self.M[:, sorted_indices]
+            self.totals = self.totals[sorted_indices]
+            self.cats = [self.df[self.cat_col].astype(str).tolist()[i] for i in sorted_indices]
+            print("📊 Primeros 5 nombres de países después de ordenar:")
+            for i, cat in enumerate(self.cats[:5]):
+                print(f"  - {i+1}: {cat}")
             self.df = self.df.iloc[sorted_indices].reset_index(drop=True)
         else:
             # Sin ordenamiento especial
@@ -99,22 +137,62 @@ class StackedHorizontalBarChart(BaseChart):
             colsum = self.M.sum(axis=0)
             colsum[colsum == 0] = 1.0
             self.M = self.M / colsum * 100.0
+
+        # === NUEVO: Calcular totales por tipo de medalla para la leyenda ===
+        legend_cfg = self.params.get("legend_config", {}).copy()
+        # SIEMPRE inyectar la paleta de colores global al legend_config (sobrescribe cualquier valor previo)
+        legend_cfg["colors"] = self.params.get("colors", {})
+        icons = legend_cfg.get("icons", [])
+        # Solo si hay íconos y cada uno tiene un label que coincide con una columna
+        if icons and all("label" in icon for icon in icons):
+            # Mapear label a columna real (insensible a mayúsculas)
+            show_totals = legend_cfg.get("show_totals_in_legend", True)
+            col_map = {c.lower(): c for c in self.df.columns}
+            for icon in icons:
+                label = icon["label"].strip().lower()
+                # Buscar columna que coincida con el label
+                colname = None
+                for c in col_map:
+                    if label in c or c in label:
+                        colname = col_map[c]
+                        break
+                if colname and colname in self.df.columns:
+                    total = self.df[colname].sum()
+                    icon["_total"] = int(total)
+                    if show_totals:
+                        icon["_label_with_total"] = f"{icon['label']} ({int(total)})"
+                    else:
+                        icon["_label_with_total"] = icon["label"]
+                else:
+                    icon["_total"] = None
+                    icon["_label_with_total"] = icon["label"]
             
     def _get_series_columns(self):
         """Determina las columnas de series a usar."""
-        series_order = self.params.get("series_order")
+        # Primero buscar en data.series (nueva ubicación preferida para series)
+        series_order = self.params.get("data", {}).get("series")
+        
+        # Si no hay series en data.series, intentar con la ubicación antigua
+        if not series_order:
+            series_order = self.params.get("series_order")
+            
+        # Preparar mapeo de columnas para búsqueda insensible a mayúsculas/minúsculas
         cols_map = {c.lower(): c for c in self.df.columns}
         
         if series_order:
+            print(f"✅ Usando series definidas en configuración: {series_order}")
             missing = [s for s in series_order if s.lower() not in cols_map]
             if missing:
                 raise KeyError(f"No encontré estas series en el CSV: {missing}. Columnas vistas: {list(self.df.columns)}")
             return [cols_map[s.lower()] for s in series_order]
         
+        # Si no hay series definidas, detectar automáticamente
         noise = {"rank","code","pais","country","flag_url","total"}
         cols = [c for c in self.df.columns if c != self.cat_col and c.lower() not in noise and pd.api.types.is_numeric_dtype(self.df[c])]
         if not cols:
             raise ValueError("No hay columnas numéricas para apilar. Usa overrides.series_order.")
+        
+        print(f"✅ Series detectadas automáticamente: {cols}")
         return cols
     
     def create_figure(self):
@@ -270,6 +348,40 @@ class StackedHorizontalBarChart(BaseChart):
             
             # Actualizar las posiciones para la próxima serie
             self.bottoms += vals
+            
+        # Añadir etiquetas de totales al final de las barras
+        total_labels_config = self.params.get("total_labels", {})
+        if total_labels_config.get("enabled", False) and total_labels_config.get("position", "end") == "end":
+            # Obtener configuración para etiquetas de totales
+            x_offset = float(total_labels_config.get("x_offset", 4))
+            font_size = float(total_labels_config.get("font_size", 12))
+            font_weight = total_labels_config.get("font_weight", "bold")
+            font_color = total_labels_config.get("color", "#333333")
+            fmt = total_labels_config.get("value_format", "{:.0f}")
+            
+            print("📊 Añadiendo etiquetas de totales al final de las barras:")
+            print(f"  - Offset X: {x_offset}")
+            print(f"  - Tamaño de fuente: {font_size}")
+            print(f"  - Peso de fuente: {font_weight}")
+            print(f"  - Color: {font_color}")
+            print(f"  - Formato: {fmt}")
+            
+            # Añadir etiquetas con los totales
+            for i, (cat, total) in enumerate(zip(self.cats, self.bottoms)):
+                # Posición para el total (al final de la barra)
+                x_pos = self.bottoms[i] + x_offset
+                y_pos = self.y_positions[i]
+                
+                # Añadir etiqueta de total
+                self.ax.text(
+                    x_pos, y_pos,
+                    fmt.format(total),
+                    ha='left', va='center',
+                    color=font_color,
+                    fontsize=font_size,
+                    fontweight=font_weight
+                )
+                print(f"  ✓ Total para {cat}: {total:.0f}")
 
     def configure_axes(self):
         """Configura los ejes y sus elementos."""
@@ -402,9 +514,28 @@ class StackedHorizontalBarChart(BaseChart):
             # También ocultamos el spine izquierdo
             self.ax.spines["left"].set_visible(False)
         
-        # Aplicar estilos de fuente a las etiquetas si están visibles
+        # Verificar posición de las etiquetas del eje Y (izquierda o derecha)
+        y_position = yaxis_config.get("position", "left").lower()
+        if y_position == "right":
+            # Mover etiquetas al lado derecho
+            self.ax.tick_params(axis='y', which='both', labelleft=False, labelright=True)
+            print("📊 Etiquetas del eje Y posicionadas a la DERECHA por configuración")
+        else:
+            # Mantener etiquetas en el lado izquierdo (predeterminado)
+            self.ax.tick_params(axis='y', which='both', labelleft=True, labelright=False)
+            print("📊 Etiquetas del eje Y posicionadas a la IZQUIERDA por configuración")
+        
+        # Aplicar estilos de fuente a las etiquetas si están visibles y ajustar posición para dejar espacio a las banderas
         if yaxis_config.get("show_labels", True) and "font" in yaxis_config:
             font_cfg = yaxis_config["font"]
+            # Obtener el padding para etiquetas (distancia adicional entre etiquetas y eje)
+            label_padding = yaxis_config.get("label_padding", -35)  # Valor negativo mueve las etiquetas hacia la izquierda
+            
+            # Ajustar las etiquetas del eje Y
+            self.ax.tick_params(axis='y', which='both', pad=label_padding)
+            print(f"📏 Ajustando posición de etiquetas del eje Y: padding = {label_padding}")
+            
+            # Aplicar configuración de fuente
             for label in self.ax.get_yticklabels():
                 label.set_fontsize(font_cfg.get("size", 11))
                 label.set_color(font_cfg.get("color", "#333333"))
@@ -491,16 +622,32 @@ class StackedHorizontalBarChart(BaseChart):
                         )
                         print(f"Bandera para {cat} colocada al final de la barra en posición x={total_value:.1f}")
                     else:
-                        # Colocar bandera al inicio (junto al eje Y)
+                        # Colocar bandera en un punto fijo entre las etiquetas y las barras
+                        from matplotlib import transforms
+                        # Combinar transformación de figura para X y datos para Y
+                        trans = transforms.blended_transform_factory(
+                            self.fig.transFigure,  # Para coordenadas X en sistema de figura
+                            self.ax.transData      # Para coordenadas Y en sistema de datos
+                        )
+                        
+                        # Obtener los límites del eje en coordenadas de figura
+                        ax_pos = self.ax.get_position()
+                        
+                        # Calcular posición ideal para las banderas
+                        # Posicionar las banderas justo antes del inicio de las barras (ax_pos.x0)
+                        # usando el offset configurado (o un valor predeterminado)
+                        offset_factor = float(flags_config.get("offset", 0.05))
+                        flag_x = ax_pos.x0 - offset_factor  # Posición ajustada con el offset
+                        
                         ab = AnnotationBbox(
                             imagebox,
-                            (-0.12, y_pos),  # Posición x a la izquierda del eje Y
-                            xycoords=('axes fraction', 'data'),
+                            (flag_x, y_pos),    # Posición x fija en coordenadas de figura
+                            xycoords=trans,      # Transformación combinada
                             box_alignment=(0.5, 0.5),  # Centrado horizontal y vertical
-                            pad=0,
+                            pad=0,              # Sin padding adicional
                             frameon=False
                         )
-                        print(f"Bandera para {cat} colocada junto al eje Y")
+                        print(f"Bandera para {cat} colocada entre el nombre y las barras")
                     
                     self.ax.add_artist(ab)
                     
@@ -524,12 +671,16 @@ class StackedHorizontalBarChart(BaseChart):
     
     def add_legend(self):
         """Añade la leyenda si está habilitada."""
-        # Usar el método de la clase base BaseChart
+        # Asegurar que la paleta de colores esté presente en legend_config antes de pasarla a la base
+        legend_cfg = self.params.get("legend_config", {}).copy()
+        legend_cfg["colors"] = self.params.get("colors", {})
+        self.params["legend_config"] = legend_cfg
         super().add_legend()
     def add_labels(self):
         """Añade etiquetas de totales."""
-        # Usar el método de la clase base BaseChart
-        super().add_labels()
+        # No llamamos a super().add_labels() porque los totales ya se añaden en el método draw_chart
+        # Esto evita la duplicación de etiquetas de totales
+        pass
     
     def add_title(self):
         """
@@ -598,20 +749,37 @@ class StackedHorizontalBarChart(BaseChart):
             padding_left = float(title_config.get("padding_left", 0.0))  # Padding izquierdo específico del título
             padding_right = float(title_config.get("padding_right", 0.0))  # Padding derecho específico del título
             
-            # Calcular ancho disponible después de aplicar márgenes globales
-            available_width = 1.0 - left_margin - right_margin
+            # Comprobar si queremos usar coordenadas de la figura completa 
+            use_figure_transform = title_config.get("transform", "") == "figure"
             
-            # Calcular posición X final basada en alineación
-            if ha == "left":
-                x_pos = left_margin + padding_left
-            elif ha == "right":
-                x_pos = 1.0 - right_margin - padding_right
-            else:  # center u otros
-                x_pos = left_margin + (available_width / 2)
-            
-                        # SIEMPRE calcular la posición Y basada en el margen superior,
-            # ignorando cualquier valor directo de 'y' en title_config para mantener consistencia
-            y_pos = 1.0 - title_top_margin
+            # Si usamos coordenadas de figura completa, permitir y explícito
+            if use_figure_transform:
+                # Usar coordenadas de figura directamente para posicionamiento extremo izquierdo
+                x_pos = float(title_config.get("x", 0.01))  # Usar valor especificado o un valor mínimo
+                if "y" in title_config:
+                    y_pos = float(title_config["y"])
+                    print(f"🖼️ Usando transformación de figura completa para el título con y explícito: y={y_pos}")
+                else:
+                    y_pos = 0.98  # Cerca del tope de la figura
+                    print("🖼️ Usando transformación de figura completa para el título (y por defecto)")
+            else:
+                # Comportamiento normal usando márgenes del eje de título
+                # Calcular ancho disponible después de aplicar márgenes globales
+                available_width = 1.0 - left_margin - right_margin
+                # Calcular posición X final basada en alineación
+                if ha == "left":
+                    x_pos = left_margin + padding_left
+                elif ha == "right":
+                    x_pos = 1.0 - right_margin - padding_right
+                else:  # center u otros
+                    x_pos = left_margin + (available_width / 2)
+                # Permitir y explícito si está en title_config, si no usar margen superior
+                if "y" in title_config:
+                    y_pos = float(title_config["y"])
+                    print(f"📌 Usando posición Y explícita para título: y={y_pos}")
+                else:
+                    y_pos = 1.0 - title_top_margin
+                    print(f"📌 Usando posición Y por margen superior para título: y={y_pos}")
             
             # Debug para ver los valores calculados
             print("DEBUG: Márgenes horizontales aplicados al título:")
@@ -623,6 +791,12 @@ class StackedHorizontalBarChart(BaseChart):
             # Usar siempre la misma alineación vertical para consistencia
             ha = title_config.get("ha", "center")
             va = "top"  # Fijar siempre a 'top' para evitar inconsistencias
+            
+            # Determinar la transformación a usar
+            transform = None
+            if title_config.get("transform", "") == "figure":
+                transform = self.fig.transFigure  # Usar coordenadas de la figura completa
+                print("🎯 Usando transformación de figura completa para el título")
             
             # Propiedades avanzadas del texto - asegurándonos de obtener el fontsize correcto
             # y convertirlo explícitamente a float para evitar problemas de tipo
@@ -673,7 +847,16 @@ class StackedHorizontalBarChart(BaseChart):
             
             # Añadir el título al gráfico
             print(f"\nℹ️ Colocando título en posición: x={x_pos:.2f}, y={y_pos:.2f}, va='{va}', ha='{ha}'")
-            title_artist = self.ax_header.text(x_pos, y_pos, title, 
+            if transform:
+                # Usar la transformación personalizada (coordenadas de figura)
+                title_artist = self.fig.text(x_pos, y_pos, title,
+                                ha=ha, va=va,
+                                transform=transform,
+                                **text_props)
+                print(f"✨ Título añadido directamente a la figura en posición absoluta: x={x_pos:.2f}, y={y_pos:.2f}")
+            else:
+                # Usar la transformación del eje de título (comportamiento normal)
+                title_artist = self.ax_header.text(x_pos, y_pos, title, 
                                 ha=ha, va=va,
                                 transform=self.ax_header.transAxes,
                                 **text_props)
@@ -769,22 +952,56 @@ class StackedHorizontalBarChart(BaseChart):
         elif subtitle_config and subtitle:
             # Usar configuración avanzada para el subtítulo
             
-            # Ajustar la posición X según los márgenes izquierdo y derecho
-            # y según la alineación horizontal (ha) del texto
-            ha = subtitle_config.get("ha", "center")
-            padding_left = float(subtitle_config.get("padding_left", 0.0))  # Padding izquierdo específico del subtítulo
-            padding_right = float(subtitle_config.get("padding_right", 0.0))  # Padding derecho específico del subtítulo
+            # Comprobar si queremos usar coordenadas de la figura completa para el subtítulo
+            use_figure_transform_subtitle = subtitle_config.get("transform", "") == "figure"
             
-            # Calcular ancho disponible después de aplicar márgenes globales
-            available_width = 1.0 - left_margin - right_margin
-            
-            # Calcular posición X final basada en alineación
-            if ha == "left":
-                x_pos = left_margin + padding_left
-            elif ha == "right":
-                x_pos = 1.0 - right_margin - padding_right
-            else:  # center u otros
-                x_pos = left_margin + (available_width / 2)
+            if use_figure_transform_subtitle:
+                # Usar coordenadas de figura directamente para posicionamiento extremo izquierdo
+                x_pos = float(subtitle_config.get("x", 0.01))  # Usar valor especificado o un valor mínimo
+                
+                # Verificar si hay una posición Y explícita en la configuración
+                if "y" in subtitle_config:
+                    y_pos = float(subtitle_config.get("y"))
+                    print(f"📌 Usando posición Y explícita para subtítulo: {y_pos}")
+                # Calcular posición Y basada en el título y considerando espacio completo de la figura
+                elif hasattr(self, 'title_artist') and self.title_artist:
+                    # Si el título usa transformación de figura, colocar muy cerca del título
+                    y_pos = 0.92  # Por defecto cerca del título
+                    
+                    # Intentar obtener información del título para ajustar el subtítulo
+                    title_text = self.title_artist.get_text()
+                    title_lines = title_text.count('\n') + 1
+                    
+                    # Ajustar según el número de líneas del título
+                    # Cuanto más líneas tiene el título, más abajo debe ir el subtítulo
+                    # Pero nunca demasiado abajo
+                    if title_lines == 1:
+                        y_pos = 0.93  # Muy cerca del título si es una sola línea
+                    elif title_lines == 2:
+                        y_pos = 0.89  # Ligeramente más abajo para títulos de 2 líneas
+                    else:
+                        y_pos = 0.85  # Más espacio para títulos de 3+ líneas
+                else:
+                    y_pos = 0.92  # Posición estándar si no hay título
+                print("🖼️ Usando transformación de figura completa para el subtítulo")
+            else:
+                # Comportamiento normal usando márgenes del eje de título
+                # Ajustar la posición X según los márgenes izquierdo y derecho
+                # y según la alineación horizontal (ha) del texto
+                ha = subtitle_config.get("ha", "center")
+                padding_left = float(subtitle_config.get("padding_left", 0.0))  # Padding izquierdo específico del subtítulo
+                padding_right = float(subtitle_config.get("padding_right", 0.0))  # Padding derecho específico del subtítulo
+                
+                # Calcular ancho disponible después de aplicar márgenes globales
+                available_width = 1.0 - left_margin - right_margin
+                
+                # Calcular posición X final basada en alineación
+                if ha == "left":
+                    x_pos = left_margin + padding_left
+                elif ha == "right":
+                    x_pos = 1.0 - right_margin - padding_right
+                else:  # center u otros
+                    x_pos = left_margin + (available_width / 2)
             
             # SIEMPRE calcular la posición basada en los márgenes, ignorando cualquier valor directo
             # de 'y' en subtitle_config para mantener consistencia
@@ -821,6 +1038,12 @@ class StackedHorizontalBarChart(BaseChart):
             print(f"  - Márgenes globales: izquierdo={left_margin:.2f}, derecho={right_margin:.2f}")
             print(f"  - Paddings específicos: izquierdo={padding_left:.2f}, derecho={padding_right:.2f}")
             print(f"  - Posición X calculada: {x_pos:.2f} (alineación='{ha}')")
+            
+            # Si hay posición Y explícita, mostrarla
+            if use_figure_transform_subtitle and "y" in subtitle_config:
+                # Usar la posición Y definida en el YAML
+                y_pos = float(subtitle_config.get("y"))  # Usar el valor del YAML
+                print(f"� FORZANDO posición Y explícita para el subtítulo: {y_pos:.2f}")
             
             va = "top"  # Fijar siempre a 'top' para evitar inconsistencias
             
@@ -867,7 +1090,30 @@ class StackedHorizontalBarChart(BaseChart):
             for key, value in text_props.items():
                 print(f"  - {key}: {value}")
                 
-            subtitle_artist = self.ax_header.text(x_pos, y_pos, subtitle, 
+            transform_subtitle = None
+            if subtitle_config.get("transform", "") == "figure":
+                transform_subtitle = self.fig.transFigure  # Usar coordenadas de la figura completa
+                
+                # Forzar la posición Y desde la configuración independientemente de todo lo anterior
+                # Esto es necesario porque hay problemas con la detección del valor Y en la configuración
+                explicit_y = subtitle_config.get("y")
+                # Usar la posición Y definida en el YAML
+                if explicit_y is not None:
+                    y_pos = float(explicit_y)  # Usar el valor del YAML
+                else:
+                    # Si no hay valor en el YAML, mantener el valor calculado previamente
+                    print(f"ℹ️ Manteniendo posición Y calculada para el subtítulo: {y_pos:.2f}")
+                print(f"� FORZANDO posición Y explícita para el subtítulo: {y_pos:.2f}")
+                
+                # Usar la transformación personalizada (coordenadas de figura)
+                subtitle_artist = self.fig.text(x_pos, y_pos, subtitle,
+                            ha=ha, va=va,
+                            transform=transform_subtitle,
+                            **text_props)
+                print(f"✨ Subtítulo añadido directamente a la figura en posición absoluta: x={x_pos:.2f}, y={y_pos:.2f}")
+            else:
+                # Usar la transformación del eje de título (comportamiento normal)
+                subtitle_artist = self.ax_header.text(x_pos, y_pos, subtitle, 
                             ha=ha, va=va,
                             transform=self.ax_header.transAxes,
                             **text_props)
@@ -922,338 +1168,16 @@ class StackedHorizontalBarChart(BaseChart):
         Añade un footer con logo y texto en la parte inferior del gráfico.
         Soporta múltiples opciones de personalización para posición, estilo y contenido.
         """
-        footer = self.params.get("footer", {})
-        if not footer:
-            return
-        
-        # Configuración general del footer
-        footer_config = footer.get("config", {})
-        
-        # Posición vertical para el footer (parte inferior de la figura)
-        footer_y = float(footer_config.get("y_position", 0.03))
-        
-        # Espaciado vertical para elementos del footer (definido para referencia futura)
-        
-        # Marco opcional para el footer
-        show_frame = bool(footer_config.get("show_frame", False))
-        frame_padding = float(footer_config.get("frame_padding", 0.01))
-        frame_alpha = float(footer_config.get("frame_alpha", 0.1))
-        frame_color = footer_config.get("frame_color", "#cccccc")
-        
-        # Si se activa el marco, dibujarlo
-        if show_frame:
-            import matplotlib.patches as patches
-            
-            # Altura del marco del footer
-            frame_height = 2 * (footer_y + frame_padding)
-            
-            # Crear un rectángulo para el marco
-            rect = patches.Rectangle(
-                (0, 0),                         # Esquina inferior izquierda
-                1.0,                            # Ancho (toda la figura)
-                frame_height,                   # Altura
-                facecolor=frame_color,
-                alpha=frame_alpha,
-                transform=self.fig.transFigure,
-                zorder=-1                       # Dibujar detrás de todo
-            )
-            self.fig.add_artist(rect)
-            
-            # Ajustar la posición vertical si hay marco
-            footer_y = footer_y + frame_padding/2
-        
-        # Añadir texto de fuente si existe
-        source_text = footer.get("source", "")
-        if source_text:
-            # Configuración de fuente
-            source_config = footer.get("source_config", {})
-            source_fontsize = float(source_config.get("fontsize", footer.get("source_fontsize", 9)))
-            source_color = source_config.get("color", footer.get("source_color", "#666666"))
-            source_style = source_config.get("style", "italic")
-            source_weight = source_config.get("weight", "normal")
-            source_family = source_config.get("family", "Nunito")
-            source_x = float(source_config.get("x_position", 0.15))
-            source_y = float(source_config.get("y_position", footer_y))
-            
-            print("ℹ️ Configurando texto de fuente en footer:")
-            print(f"  - Texto: '{source_text}'")
-            print(f"  - Posición: x={source_x}, y={source_y}")
-            print(f"  - Tamaño de fuente: {source_fontsize}")
-            
-            self.fig.text(
-                source_x,     # Posición horizontal personalizable
-                source_y,     # Posición vertical personalizada
-                source_text,
-                ha='left',
-                va='center',
-                fontsize=float(source_fontsize),  # Asegurarse que es float
-                color=source_color,
-                style=source_style,
-                weight=source_weight,
-                family=source_family
-            )
-        
-        # Añadir texto adicional/nota si existe
-        note_text = footer.get("note", "")
-        if note_text:
-            # Configuración de nota
-            note_config = footer.get("note_config", {})
-            note_fontsize = float(note_config.get("fontsize", footer.get("note_fontsize", 9)))
-            note_color = note_config.get("color", footer.get("note_color", "#666666"))
-            note_style = note_config.get("style", "normal")
-            note_weight = note_config.get("weight", "normal")
-            note_family = note_config.get("family", "Nunito")
-            note_x = float(note_config.get("x_position", 0.5))
-            note_y = float(note_config.get("y_position", footer_y))
-            note_align = note_config.get("alignment", "center")
-            
-            print("ℹ️ Configurando texto de nota en footer:")
-            print(f"  - Texto: '{note_text}'")
-            print(f"  - Posición: x={note_x}, y={note_y}")
-            print(f"  - Tamaño de fuente: {note_fontsize}")
-            
-            self.fig.text(
-                note_x,       # Posición horizontal personalizable
-                note_y,       # Posición vertical personalizada
-                note_text,
-                ha=note_align,
-                va='center',
-                fontsize=float(note_fontsize),  # Asegurarse que es float
-                color=note_color,
-                style=note_style,
-                weight=note_weight,
-                family=note_family
-            )
-        
-        # Añadir uno o más logos si se especifican
-        logos = footer.get("logos", [])
-        # Compatibilidad con versión antigua que usa solo un logo
-        if not logos and "logo" in footer:
-            logos = [{"path": footer.get("logo", ""), "zoom": footer.get("logo_zoom", 0.15), "x_position": 0.85}]
-        
-        # Procesar cada logo configurado
-        for logo_config in logos:
-            logo_path = logo_config.get("path", "")
-            if logo_path and Path(logo_path).exists():
-                try:
-                    from matplotlib.image import imread
-                    from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-                    
-                    # Cargar la imagen del logo
-                    logo_img = imread(logo_path)
-                    
-                    # Opciones para controlar el tamaño del logo
-                    size_method = logo_config.get("size_method", "zoom")
-                    
-                    # Método 1: Factor de zoom simple (método original)
-                    logo_zoom = float(logo_config.get("zoom", 0.15))
-                    
-                    # Método 2: Tamaño absoluto en pulgadas
-                    logo_width_inches = float(logo_config.get("width_inches", 0))
-                    logo_height_inches = float(logo_config.get("height_inches", 0))
-                    
-                    # Método 3: Tamaño relativo a la figura (fracción)
-                    logo_width_fraction = float(logo_config.get("width_fraction", 0))
-                    logo_height_fraction = float(logo_config.get("height_fraction", 0))
-                    
-                    # Método 4: Tamaño en píxeles
-                    logo_width_pixels = float(logo_config.get("width_pixels", 0))
-                    logo_height_pixels = float(logo_config.get("height_pixels", 0))
-                    
-                    # Determinar el factor de zoom basado en el método seleccionado
-                    if size_method == "absolute_inches" and (logo_width_inches > 0 or logo_height_inches > 0):
-                        # Convertir tamaño absoluto en pulgadas a un factor de zoom
-                        img_height, img_width = logo_img.shape[:2] if len(logo_img.shape) > 2 else logo_img.shape
-                        fig_width_inches, fig_height_inches = self.fig.get_size_inches()
-                        
-                        # Si solo se especifica una dimensión, mantener la proporción
-                        if logo_width_inches > 0 and logo_height_inches == 0:
-                            logo_zoom = (logo_width_inches / fig_width_inches) * (fig_width_inches / (img_width / self.fig.dpi))
-                        elif logo_height_inches > 0 and logo_width_inches == 0:
-                            logo_zoom = (logo_height_inches / fig_height_inches) * (fig_height_inches / (img_height / self.fig.dpi))
-                        else:
-                            # Si ambos están especificados, usar el menor factor para evitar distorsión
-                            zoom_width = (logo_width_inches / fig_width_inches) * (fig_width_inches / (img_width / self.fig.dpi))
-                            zoom_height = (logo_height_inches / fig_height_inches) * (fig_height_inches / (img_height / self.fig.dpi))
-                            logo_zoom = min(zoom_width, zoom_height)
-                    
-                    elif size_method == "fraction" and (logo_width_fraction > 0 or logo_height_fraction > 0):
-                        # Convertir fracción de figura a factor de zoom
-                        img_height, img_width = logo_img.shape[:2] if len(logo_img.shape) > 2 else logo_img.shape
-                        fig_width_inches, fig_height_inches = self.fig.get_size_inches()
-                        
-                        if logo_width_fraction > 0 and logo_height_fraction == 0:
-                            logo_zoom = logo_width_fraction * (fig_width_inches / (img_width / self.fig.dpi))
-                        elif logo_height_fraction > 0 and logo_width_fraction == 0:
-                            logo_zoom = logo_height_fraction * (fig_height_inches / (img_height / self.fig.dpi))
-                        else:
-                            zoom_width = logo_width_fraction * (fig_width_inches / (img_width / self.fig.dpi))
-                            zoom_height = logo_height_fraction * (fig_height_inches / (img_height / self.fig.dpi))
-                            logo_zoom = min(zoom_width, zoom_height)
-                            
-                    elif size_method == "pixels" and (logo_width_pixels > 0 or logo_height_pixels > 0):
-                        # Convertir tamaño en píxeles a factor de zoom
-                        img_height, img_width = logo_img.shape[:2] if len(logo_img.shape) > 2 else logo_img.shape
-                        
-                        if logo_width_pixels > 0 and logo_height_pixels == 0:
-                            logo_zoom = logo_width_pixels / img_width
-                        elif logo_height_pixels > 0 and logo_width_pixels == 0:
-                            logo_zoom = logo_height_pixels / img_height
-                        else:
-                            zoom_width = logo_width_pixels / img_width
-                            zoom_height = logo_height_pixels / img_height
-                            logo_zoom = min(zoom_width, zoom_height)
-                    
-                    # Si se solicita, redimensionar la imagen manteniendo las proporciones
-                    if logo_config.get("preserve_aspect_ratio", True) and size_method != "zoom":
-                        # Ya se ha calculado el factor de zoom considerando proporciones
-                        pass
-                    
-                    # Posición horizontal
-                    logo_x = float(logo_config.get("x_position", 0.85))
-                    
-                    # Alineación del logo
-                    logo_align = logo_config.get("alignment", (1.0, 0.5))  # Por defecto alineado a la derecha
-                    
-                    if isinstance(logo_align, str):
-                        # Convertir string a tuple si se proporciona como texto
-                        if logo_align == "right":
-                            logo_align = (1.0, 0.5)
-                        elif logo_align == "left":
-                            logo_align = (0.0, 0.5)
-                        elif logo_align == "center":
-                            logo_align = (0.5, 0.5)
-                    
-                    print("ℹ️ Añadiendo logo en footer:")
-                    print(f"  - Archivo: '{logo_path}'")
-                    print(f"  - Método de tamaño: '{size_method}'")
-                    print(f"  - Factor de zoom calculado: {logo_zoom:.4f}")
-                    print(f"  - Posición: x={logo_x}, y={footer_y}")
-                    
-                    # Crear un OffsetImage con la imagen del logo
-                    imagebox = OffsetImage(logo_img, zoom=logo_zoom)
-                    
-                    # Posicionar el logo según la configuración
-                    ab = AnnotationBbox(
-                        imagebox, 
-                        (logo_x, footer_y),    # Posición personalizable
-                        xycoords='figure fraction',
-                        box_alignment=logo_align,
-                        frameon=False
-                    )
-                    
-                    # Añadir el logo a la figura
-                    self.fig.add_artist(ab)
-                except Exception as e:
-                    print(f"⚠️ Error al cargar el logo {logo_path}: {e}")
+        from app.components import add_footer
+        add_footer(self.fig, self.params)
     
     def add_decorative_elements(self):
         """
         Añade elementos decorativos al gráfico basados en la configuración.
-        Soporta rectángulos, líneas y otros elementos visuales para estilo Statista.
+        Soporta rectángulos, líneas y otros elementos visuales para estilo personalizado.
         """
-        # Verificar si hay configuración de elementos decorativos
-        decorative_elements = self.params.get("decorative_elements", [])
-        
-        if not decorative_elements:
-            print("ℹ️ No hay elementos decorativos configurados.")
-            return
-            
-        print(f"🎨 Añadiendo {len(decorative_elements)} elementos decorativos...")
-        
-        for i, element in enumerate(decorative_elements):
-            element_type = element.get("type", "").lower()
-            
-            try:
-                # Elemento tipo rectángulo (como la barra vertical roja de Statista)
-                if element_type == "rectangle":
-                    # Coordenadas y dimensiones (en fracción de figura)
-                    x = float(element.get("x", 0))
-                    y = float(element.get("y", 0))
-                    width = float(element.get("width", 0.01))
-                    height = float(element.get("height", 0.5))
-                    color = element.get("color", "#ff3b30")  # Color rojo por defecto
-                    alpha = float(element.get("alpha", 1.0))
-                    zorder = int(element.get("zorder", 10))  # Orden de capa (sobre/bajo otros elementos)
-                    
-                    # Crear un Rectangle patch
-                    from matplotlib.patches import Rectangle
-                    rect = Rectangle(
-                        (x, y),                     # Posición (x, y) en fracción de figura
-                        width, height,              # Ancho y alto en fracción de figura
-                        facecolor=color,
-                        edgecolor='none',           # Sin borde
-                        alpha=alpha,
-                        transform=self.fig.transFigure,  # Usar coordenadas de figura
-                        zorder=zorder
-                    )
-                    
-                    # Añadir el rectángulo a la figura
-                    self.fig.add_artist(rect)
-                    print(f"  ✓ Añadido rectángulo decorativo en ({x:.2f}, {y:.2f}) con color {color}")
-                    
-                # Elemento tipo línea (para separadores u otros elementos)
-                elif element_type == "line":
-                    # Coordenadas de inicio y fin (en fracción de figura)
-                    x1 = float(element.get("x1", 0))
-                    y1 = float(element.get("y1", 0))
-                    x2 = float(element.get("x2", 1))
-                    y2 = float(element.get("y2", 0))
-                    linewidth = float(element.get("linewidth", 1.0))
-                    color = element.get("color", "#333333")
-                    alpha = float(element.get("alpha", 1.0))
-                    zorder = int(element.get("zorder", 10))
-                    linestyle = element.get("linestyle", "-")
-                    
-                    # Crear una Line2D
-                    from matplotlib.lines import Line2D
-                    line = Line2D(
-                        [x1, x2], [y1, y2],         # Puntos de inicio y fin
-                        linewidth=linewidth,
-                        color=color,
-                        alpha=alpha,
-                        zorder=zorder,
-                        linestyle=linestyle,
-                        transform=self.fig.transFigure
-                    )
-                    
-                    # Añadir la línea a la figura
-                    self.fig.add_artist(line)
-                    print(f"  ✓ Añadida línea decorativa de ({x1:.2f}, {y1:.2f}) a ({x2:.2f}, {y2:.2f})")
-                    
-                # Texto decorativo (para etiquetas, notas o watermarks)
-                elif element_type == "text":
-                    # Posición y contenido
-                    x = float(element.get("x", 0.5))
-                    y = float(element.get("y", 0.5))
-                    text = element.get("text", "")
-                    fontsize = float(element.get("fontsize", 12))
-                    fontweight = element.get("fontweight", "normal")
-                    color = element.get("color", "#333333")
-                    alpha = float(element.get("alpha", 1.0))
-                    ha = element.get("ha", "center")
-                    va = element.get("va", "center")
-                    rotation = float(element.get("rotation", 0))
-                    zorder = int(element.get("zorder", 10))
-                    
-                    # Añadir el texto a la figura
-                    self.fig.text(
-                        x, y, text,
-                        fontsize=fontsize,
-                        fontweight=fontweight,
-                        color=color,
-                        alpha=alpha,
-                        ha=ha, va=va,
-                        rotation=rotation,
-                        zorder=zorder
-                    )
-                    print(f"  ✓ Añadido texto decorativo '{text}' en ({x:.2f}, {y:.2f})")
-                    
-                else:
-                    print(f"  ⚠️ Tipo de elemento decorativo no soportado: '{element_type}'")
-            
-            except Exception as e:
-                print(f"  ⚠️ Error al añadir elemento decorativo #{i+1}: {e}")
+        from app.components import add_decorative_elements
+        add_decorative_elements(self.fig, self.params)
                 
     def finalize(self):
         """Finaliza y guarda el gráfico."""
@@ -1262,23 +1186,12 @@ class StackedHorizontalBarChart(BaseChart):
         # Elimina o comenta la siguiente línea:
         # self.ax.set_position([0.15, 0.05, 0.8, 0.8])
         
-        # Añadir elementos decorativos antes de guardar
-        self.add_decorative_elements()
+        # Usar la función centralizada para finalizar y guardar el gráfico
+        from app.components import finalize
+        finalize(self.fig, self.params)
         
-        # Guardar si se especifica un archivo de salida
-        if "outfile" in self.params:
-            dpi = int(self.params.get("dpi", 300))
-            formatos = self.params.get("formats", ["png"])
-            base_outfile = str(self.params["outfile"]).rsplit(".", 1)[0]
-            for fmt in formatos:
-                outfile = f"{base_outfile}.{fmt}"
-                self.fig.savefig(
-                    outfile,
-                    dpi=dpi,
-                    bbox_inches=None
-                )
-                print(f"✅ Gráfico guardado en: {outfile}")
-        plt.close(self.fig)
+        # Debug the formats configuration
+        print(f"[DEBUG] StackedHorizontalBarChart.finalize: usando componentes centralizados")
 
 # Las funciones _load_yaml y _merge_params se han trasladado a app/io_utils.py
 
@@ -1286,7 +1199,7 @@ def stackedbarh(config: Path = typer.Argument(..., help="Ruta a config YAML")):
     """Gráfico de barras horizontales apiladas con elementos básicos de matplotlib."""
     from app.chart_utils import render_chart
     
-    # Usar la función genérica para renderizar el gráfico
+    # Usar la función render_chart que maneja correctamente la carga de templates
     render_chart(StackedHorizontalBarChart, config)
 
 def add_command(app: typer.Typer) -> None:
@@ -1295,7 +1208,9 @@ def add_command(app: typer.Typer) -> None:
 if __name__ == "__main__":
     # Para pruebas directas
     import sys
-    if len(sys.argv) > 1:
-        stackedbarh(Path(sys.argv[1]))
-    else:
-        print("Uso: python stackedbarh.py ruta/al/config.yml")
+    # Evitar conflicto cuando se ejecuta como módulo
+    if not sys.argv[0].endswith('__main__.py'):
+        if len(sys.argv) > 1:
+            stackedbarh(Path(sys.argv[1]))
+        else:
+            print("Uso: python stackedbarh.py ruta/al/config.yml")

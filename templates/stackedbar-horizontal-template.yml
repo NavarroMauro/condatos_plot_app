@@ -9,12 +9,26 @@ formats: ["png", "svg", "pdf"]
 width_in: 12
 height_in: 14
 
+
+chart:
+  type: "stackedbarh"
+  palette: "condatos"
+  figure_size: [10, 10]  # Ancho y alto en pulgadas
+  max_categories: 20     # Máximo número de categorías a mostrar
+  bar_width: 0.7         # Ancho de las barras (0-1)
+  sort_by_total: true    # Ordenar por totales
+  invert_order: false    # Si es true, ordena de menor a mayor
+  value_labels: true     # Mostrar etiquetas de valores
+  value_totals: true     # Mostrar totales al final de cada barra
+  filter_min_value: 5    # ¡NUEVO! Filtrar países con menos de 5 medallas en total
+
+
 # Configuración de márgenes
 margins:
   auto_adjust: true    # Ajuste automático del margen izquierdo basado en longitud de texto
   left: null           # Valor manual (null para usar auto_adjust)
   right: 0.02          # Margen derecho
-  top: 0.15            # Margen superior (altura del header) - Aumentado para más espacio
+  top: 0.25            # Margen superior (altura del header) - Aumentado significativamente para más espacio
   bottom: 0.12         # Margen inferior
   text_padding: 0.1    # Espacio adicional después del texto (en pulgadas)
   min_left: 0.1        # Valor mínimo para el margen izquierdo
@@ -24,10 +38,10 @@ margins:
 # Este sistema de posicionamiento basado en márgenes es más robusto
 # y evita problemas con title_y_position y subtitle_y_position
 title_spacing:
-  top_margin: 0.08           # 8% de espacio desde el borde superior
-  bottom_margin: 0.10        # 10% entre título y subtítulo
-  subtitle_top_margin: 0.05  # 5% adicional antes del subtítulo
-  subtitle_bottom_margin: 0.10 # 10% debajo del subtítulo
+  top_margin: 0.15           # 15% de espacio desde el borde superior
+  bottom_margin: 0.15        # 15% entre título y subtítulo
+  subtitle_top_margin: 0.10  # 10% adicional antes del subtítulo
+  subtitle_bottom_margin: 0.15 # 15% debajo del subtítulo
 
 # Configuración de autoajuste
 autosize:
@@ -42,7 +56,7 @@ sort_by_total: true  # Ordenar de mayor a menor por valor total
 # Título y subtítulo - Configuración básica
 title: ""
 subtitle: ""
-title_font_size: 28          # Tamaño base para el título
+title_font_size: 34          # Tamaño base para el título (aumentado)
 title_font_weight: "bold"    # Negrita para mejor visibilidad
 title_color: "#333333"
 title_font_family: "Nunito"  
@@ -51,7 +65,7 @@ title_x_position: 0.5        # Centrado horizontalmente
 title_horizontal_alignment: "center"  # Opciones: left, center, right
 title_vertical_alignment: "top"       # Siempre usar 'top' para posicionamiento coherente
 
-subtitle_font_size: 20       # Tamaño base para el subtítulo
+subtitle_font_size: 24       # Tamaño base para el subtítulo (aumentado)
 subtitle_color: "#666666"
 subtitle_font_family: "Nunito"  
 subtitle_font_style: "italic"   # Itálica para diferenciar del título
@@ -63,7 +77,7 @@ subtitle_vertical_alignment: "top"  # Siempre usar 'top' para posicionamiento co
 title_config:
   x: 0.5
   ha: "center"
-  fontsize: 28              # Tamaño del título (en puntos)
+  fontsize: 34              # Tamaño del título (en puntos) (aumentado)
   fontweight: "bold"        # Negrita
   color: "#333333"          # Color del texto
   style: "normal"           # Estilo normal
@@ -78,10 +92,10 @@ title_config:
 subtitle_config:
   x: 0.5
   ha: "center"
-  fontsize: 20              # Tamaño del subtítulo (en puntos)
+  fontsize: 24              # Tamaño del subtítulo (en puntos) (aumentado)
   color: "#666666"          # Color del texto
   style: "italic"           # Estilo itálica para distinguir del título
-  linespacing: 1
+  linespacing: 1.2
 
 # Configuración de barras
 bar:
@@ -96,16 +110,18 @@ colors:
   plata: "#A8A9AD"
   bronce: "#CD7F32"
 
-# Etiquetas dentro de las barras
-value_labels: true
-value_format: "{:.0f}"
+# Etiquetas de valores
+value_labels: true         # Desactivamos las etiquetas dentro de las barras
 
-# Etiquetas de totales
+# Configuración de etiquetas de totales específica para este gráfico
 total_labels:
-  enabled: true
-  x_offset: 4
-  font_size: 12
-  font_weight: "bold"
+  enabled: true           # Activar etiquetas de totales
+  position: "end"         # Mostrar al final de las barras donde antes estaban las banderas
+  x_offset: 4             # Offset personalizado
+  font_size: 14           # Tamaño de fuente personalizado
+  font_weight: "normal"     # Negrita para mejor visibilidad
+  color: "#222222"        # Color personalizado más oscuro para mejor contraste
+  value_format: "{:.0f}"  # Formato para mostrar los valores
 
 # Configuración del eje Y
 yaxis:
@@ -126,6 +142,7 @@ xaxis:
 flags:
   enabled: true
   debug: true
+  position: "start"       # Posición de banderas: "start" para inicio (después del nombre del país), "end" para final de la barra
   show_axis_labels: true  # Mostrar nombres de países en el eje Y
   pattern: "assets/flags/{CODE}.png"
   code_column: "code"

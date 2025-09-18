@@ -252,3 +252,31 @@ Para mantener la consistencia en todas las visualizaciones de datos chilenos y l
 4. **Destacado de Chile**: En comparativas regionales, resaltar siempre a Chile con un color distintivo (#D22730 - rojo) o un estilo de línea más prominente.
 
 5. **Idioma**: Todas las leyendas deben estar en español, utilizando la terminología correcta para los conceptos económicos y sociales según los estándares chilenos.
+
+## Leyendas con Imágenes Personalizadas
+
+Desde la versión más reciente, es posible configurar leyendas que usen imágenes en lugar de los marcadores de color estándar. Para más información consulta [CUSTOM_LEGEND_IMAGES.md](CUSTOM_LEGEND_IMAGES.md).
+
+```yaml
+legend_config:
+  # Configuración estándar...
+  custom_icons: true
+  icons:
+    - label: "Oro"
+      image: "assets/icons/gold_medal.png"
+      zoom: 0.15
+    - label: "Plata"
+      image: "assets/icons/silver_medal.png"
+      zoom: 0.15
+```
+
+## Añadir Logo de Organización
+
+También puedes añadir un logo institucional o de proyecto sobre la leyenda:
+
+```yaml
+logo:
+  path: "assets/logo_condatos.png"
+  position: "above_legend"
+  zoom: 0.2
+```

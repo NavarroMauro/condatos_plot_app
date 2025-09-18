@@ -1,0 +1,43 @@
+# Ejemplo de configuración con leyenda personalizada con imágenes y logo
+template: "templates/stackedbar-horizontal-template.yml"
+outfile: "out/medallas-ejemplo"
+
+# Datos de ejemplo
+data:
+  inline:
+    pais: ["Chile", "Argentina", "Perú", "Colombia", "Brasil"]
+    oro: [15, 12, 8, 10, 20]
+    plata: [10, 14, 9, 11, 18]
+    bronce: [12, 15, 10, 12, 15]
+
+title: "Medallero de los Juegos Latinoamericanos 2024"
+subtitle: "Distribución de medallas por país"
+
+# Configuración de leyenda personalizada con imágenes
+legend_config:
+  loc: "upper right"
+  # Ajustado bbox_to_anchor para posicionar la leyenda más arriba en la figura
+  bbox_to_anchor: [0.98, 0.15]
+  ncol: 1
+  fontsize: 12
+  frameon: true
+  facecolor: "#f8f8f8"
+  title: "Tipos de medallas"
+  title_fontsize: 22
+  title_fontweight: "bold"
+  custom_icons: true  # Habilita uso de iconos personalizados
+  use_direct_drawing: true  # Usa el nuevo sistema de dibujo directo en figura
+  preserve_alpha: true  # Conserva transparencia en las imágenes
+  icons: [
+        {"label": "Oro", "image": "assets/icons/medal_gold_resized.png", "zoom": 0.28},
+        {"label": "Plata", "image": "assets/icons/medal_silver.png", "zoom": 0.28},
+        {"label": "Bronce", "image": "assets/icons/medal_bronze.png", "zoom": 0.28},
+    ]
+
+# Configuración de logo organizacional
+logo:
+  path: "assets/logo_condatos.png"
+  position: "above_legend"  # Opciones: above_legend, top_left, top_right, custom
+  fallback_position: "top_right"  # Si no se encuentra leyenda, usar esta posición
+  zoom: 0.2
+  margin: 0.04  # Margen sobre la leyenda (aumentado para mejor separación)

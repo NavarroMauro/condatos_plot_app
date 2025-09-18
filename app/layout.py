@@ -8,16 +8,18 @@ from .branding import add_branding
 from .io_utils import save_fig_multi
 
 
-def _draw_header(fig, params: Mapping[str, Any]) -> None:
+def _draw_header(fig, params: Mapping[str, Any]):
     """Dibuja el header como una entidad aislada."""
     # Obtener configuración
-    title_config = params.get("title", {}) or {}
-    subtitle_config = params.get("subtitle", {}) or {}
+    title = params.get("title", "")
+    subtitle = params.get("subtitle", "")
+    title_config = params.get("title_config", {}) or {}
+    subtitle_config = params.get("subtitle_config", {}) or {}
     layout = params.get("layout", {})
 
     # Extraer texto y configuración
-    title_text = title_config.get("text", "")
-    subtitle_text = subtitle_config.get("text", "")
+    title_text = title if isinstance(title, str) else title.get("text", "")
+    subtitle_text = subtitle if isinstance(subtitle, str) else subtitle.get("text", "")
     title_size = params.get("header", {}).get("title_size", 28)
     subtitle_size = params.get("header", {}).get("subtitle_size", 22)
 
@@ -39,6 +41,8 @@ def _draw_header(fig, params: Mapping[str, Any]) -> None:
     header_ax.set_yticks([])
     for spine in header_ax.spines.values():
         spine.set_visible(False)
+        
+    return header_ax
 
     # Función para wrapping de texto
     def wrap_text(text, fontsize):
@@ -95,7 +99,7 @@ def apply_frame(fig, params: Mapping[str, Any]):
     content_width = 1.0 - margin_left - margin_right
     
     # Dibujar header
-    _draw_header(fig, params)
+    header_ax = _draw_header(fig, params)
     
     # Posicionar contenido principal
     main_ax.set_position([
@@ -124,6 +128,8 @@ def apply_frame(fig, params: Mapping[str, Any]):
     main_ax.set_autoscaley_on(False)
     
     fig.canvas.draw()
+    
+    return fig, header_ax, main_ax
 
 
 def finish_and_save(fig, params: Mapping[str, Any]):
@@ -135,10 +141,12 @@ def finish_and_save(fig, params: Mapping[str, Any]):
     add_branding(fig, branding_cfg)
 
     out = Path(params.get("outfile", "out/figure"))
+    formats = params.get("formats", ["png", "svg", "pdf"])
+    print(f"[DEBUG] finish_and_save: Extracted formats from params: {formats}")
     save_fig_multi(
         fig,
         out,
-        formats=params.get("formats", ["png", "svg", "pdf"]),
+        formats=formats,
         jpg_quality=params.get("jpg_quality", 95),
         webp_quality=params.get("webp_quality", 95), 
         avif_quality=params.get("avif_quality", 80),

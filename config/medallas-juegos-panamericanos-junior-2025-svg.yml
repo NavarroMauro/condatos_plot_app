@@ -1,0 +1,96 @@
+template: templates/stackedbar-horizontal-template.yml
+outfile: out/medallas-juegos-panamericanos-junior-2025-svg
+formats:
+  - png
+  - svg
+  - pdf
+
+title:
+  text: "Medallero Juegos Panamericanos Junior"
+  font:
+    size: 24
+    family: "DejaVu Sans"
+    weight: "bold"
+    color: "#333333"
+
+subtitle:
+  text: "Proyección 2025 - Desagregado por tipo de medalla"
+  font:
+    size: 14
+    family: "DejaVu Sans"
+    weight: "normal"
+    color: "#666666"
+
+data:
+  file: data/medallas-juegos-panamericanos-junior-2025.csv
+
+# Configuración de series
+color_mapping:
+  Oro: "#E5B13A"    # Dorado
+  Plata: "#A8A9AD"  # Plateado
+  Bronce: "#CD7F32" # Bronce
+
+# Configuración de leyenda con SVGs coloreables
+legend_config:
+  loc: "upper right"
+  bbox_to_anchor: [0.98, 0.15]
+  ncol: 3
+  fontsize: 12
+  frameon: true
+  facecolor: "#f8f8f8"
+  title: "Tipos de medallas"
+  title_fontsize: 14
+  title_fontweight: "bold"
+  custom_icons: true
+  # Se usa un único SVG como plantilla para los tres tipos de medallas
+  icons:
+    - label: "Oro"
+      svg_template: "assets/icons/medal_template.svg"
+      color: "#E5B13A"
+      zoom: 0.15
+    - label: "Plata"
+      svg_template: "assets/icons/medal_template.svg"
+      color: "#A8A9AD"
+      zoom: 0.15
+    - label: "Bronce"
+      svg_template: "assets/icons/medal_template.svg"
+      color: "#CD7F32"
+      zoom: 0.15
+
+# Configuración de estilo
+width_in: 10
+height_in: 8
+dpi: 300
+style: condatos
+
+# Configuraciones para ajuste automático del tamaño
+autosize:
+  enabled: true
+  width_in: 12
+  height_per_row: 0.25
+  min_body_height: 6
+  max_body_height: 12
+  header_height_in: 1.5
+  footer_height_in: 1.0
+
+# Configuración de branding
+branding:
+  logo:
+    path: assets/icons/condatos-logo.png
+    width: 0.2
+    bottom_offset: 0.03
+    left_offset: 0.03
+  text:
+    enabled: true
+    content: "ConDatos-Figs-App - condatos.org"
+    size: 10
+    bottom_offset: 0.03
+    right_offset: 0.03
+    color: "#666666"
+  source:
+    enabled: true
+    content: "Fuente: Datos simulados para ejemplo de SVG coloreable"
+    size: 9
+    bottom_offset: 0.03
+    left_offset: 0.25
+    color: "#666666"

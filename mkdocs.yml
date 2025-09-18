@@ -1,0 +1,62 @@
+site_name: ConDatos-Figs-App
+site_description: Documentación de la aplicación ConDatos-Figs-App para visualizaciones de datos
+repo_url: https://github.com/nombre-usuario/condatos-figs-app
+repo_name: condatos-figs-app
+
+theme:
+  name: material
+  language: es
+  palette:
+    primary: blue
+    accent: light blue
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings
+
+nav:
+  - Inicio: 'index.md'
+  - Guías Consolidadas:
+    - 'Introducción': 'consolidated/README.md'
+    - 'Personalización de Componentes': 'consolidated/COMPONENTS.md'
+    - 'Arquitectura y Diseño': 'consolidated/ARCHITECTURE_DESIGN.md'
+    - 'Estándares y Mejores Prácticas': 'consolidated/STANDARDS_PRACTICES.md'
+    - 'Guía de Desarrollo': 'consolidated/DEVELOPMENT_GUIDE.md'
+    - 'Pie de Página': 'consolidated/FOOTER.md'
+    - 'Seguimiento': 'consolidated/TRACKING.md'
+  - Referencia API:
+    - 'Plots': 'plots/README.md'
+  - Otros Documentos:
+    - 'Plantillas y Formatos de Datos': 'TEMPLATES_DATA_FORMATS.md'
+    - 'Filtrar por Valor': 'FILTER_BY_VALUE.md'
+    - 'Tareas': 'TASKS.md'
+    - 'Refactorización': 'REFACTORING.md'
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/nombre-usuario/condatos-figs-app
+  generator: false

@@ -18,8 +18,10 @@ def save_fig_multi(fig, base: Path, formats: Iterable[str],
                    jpg_quality=92, webp_quality=92, avif_quality=55,
                    scour_svg=True):
     base = base.with_suffix("")
+    print(f"[DEBUG] save_fig_multi: Formats received: {formats}")
     for fmt in formats:
         fmt_lower = fmt.lower()
+        print(f"[DEBUG] save_fig_multi: Processing format: {fmt_lower}")
         if fmt_lower in {"png","pdf","svg"}:
             out = base.with_suffix(f".{fmt_lower}")
             ensure_parent(out)

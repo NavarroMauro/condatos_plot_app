@@ -1,0 +1,55 @@
+# Ejemplo de configuración para visualización con conexión a PostgreSQL
+# Nombre: pib-inflacion-2023.yml
+
+# Usar el template de gráfico de líneas con soporte para PostgreSQL
+template: "templates/linechart-condatos.yml"
+
+# Personalizar el título y subtítulo para este gráfico específico
+title: "Evolución del PIB e Inflación en Chile"
+subtitle: "Datos trimestrales (2015-2023)"
+
+# Personalizar la conexión a PostgreSQL para esta visualización
+data_source:
+  type: "postgresql"
+  connection:
+    host: "db.condatos.cl"
+    database: "estadisticas_chile"
+  query: "SELECT 
+            fecha_trimestre, 
+            pib_var_trimestral, 
+            inflacion_trimestral 
+          FROM indicadores_trimestrales 
+          WHERE pais = 'Chile' AND 
+                fecha_trimestre BETWEEN '2015-01-01' AND '2023-12-31' 
+          ORDER BY fecha_trimestre"
+  # Personalizar el mapeo de columnas
+  column_mapping:
+    x: "fecha_trimestre"
+    series:
+      - name: "Variación PIB (%)"
+        column: "pib_var_trimestral"
+        color: "#1A535C"
+      - name: "Inflación (%)"
+        column: "inflacion_trimestral"
+        color: "#FF6B6B"
+
+# Personalizar aspectos visuales específicos para este gráfico
+linechart:
+  linewidth: 3
+  marker:
+    enabled: true
+    size: 7
+    edgewidth: 1.5
+
+# Destacar áreas de interés en el gráfico
+annotations:
+  regions:
+    - label: "Pandemia COVID-19"
+      from: "2020-03-01"
+      to: "2021-06-30"
+      color: "#f8f8f8"
+      alpha: 0.3
+
+# Personalizar la fuente para este gráfico específico
+footer:
+  source: "Fuente: Banco Central de Chile, 2023"

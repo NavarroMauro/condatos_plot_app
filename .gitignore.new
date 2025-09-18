@@ -1,0 +1,50 @@
+# Archivos temporales del sistema
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Caché y directorios de compilación
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+*.so
+.coverage
+htmlcov/
+coverage.xml
+
+# Directorios y archivos de entorno
+env/
+venv/
+ENV/
+.env
+.venv
+.Python
+.python-version
+
+# Configuración del editor
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+.idea/
+
+# Archivos de proyecto y dependencias
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Archivos temporales y de respaldo
+*.bak
+*.new
+*.tmp
+netlog.json
+
+# Directorios de salida (si solo contienen resultados generados)
+# Descomenta la siguiente línea si deseas excluir el directorio completo
+# out/
+
+# Archivos específicos del proyecto
+# Descomentar líneas según sea necesario
+# setup_condatos_figs.sh.new

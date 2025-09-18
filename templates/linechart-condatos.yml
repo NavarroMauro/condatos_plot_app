@@ -1,0 +1,237 @@
+# Template para gráficos de línea
+# Archivo: linechart-condatos.yml
+
+# Configuración general
+dpi: 300
+formats: ["png", "svg", "pdf"]
+
+# Dimensiones base de la figura
+width_in: 12
+height_in: 8
+
+# Configuración de márgenes
+margins:
+  auto_adjust: true    # Ajuste automático del margen izquierdo basado en longitud de texto
+  left: 0.12           # Margen izquierdo
+  right: 0.05          # Margen derecho
+  top: 0.15            # Margen superior (altura del header)
+  bottom: 0.12         # Margen inferior
+
+# Configuración de espaciado de título y subtítulo
+title_spacing:
+  top_margin: 0.08           # 8% de espacio desde el borde superior
+  bottom_margin: 0.10        # 10% entre título y subtítulo
+  subtitle_top_margin: 0.05  # 5% adicional antes del subtítulo
+  subtitle_bottom_margin: 0.10 # 10% debajo del subtítulo
+
+# Configuración de autoajuste
+autosize:
+  enabled: true
+  width_per_point: 0.2
+  min_width: 8
+  max_width: 14
+  min_height: 5
+  max_height: 10
+  aspect_ratio: 0.6     # Relación altura/ancho
+
+# Ordenar datos por eje X
+sort_by_x: true
+
+# Título y subtítulo - Configuración básica
+title: "Título del gráfico de líneas"
+subtitle: "Subtítulo con información adicional"
+title_font_size: 28
+title_font_weight: "bold"
+title_color: "#333333"
+title_font_family: "Nunito"
+title_font_style: "normal"
+title_x_position: 0.5
+title_horizontal_alignment: "center"
+title_vertical_alignment: "top"
+
+subtitle_font_size: 20
+subtitle_color: "#666666"
+subtitle_font_family: "Nunito"
+subtitle_font_style: "italic"
+subtitle_x_position: 0.5
+subtitle_horizontal_alignment: "center"
+subtitle_vertical_alignment: "top"
+
+# Configuración avanzada del título (tiene precedencia sobre los valores básicos)
+title_config:
+  x: 0.5
+  ha: "center"
+  fontsize: 28
+  fontweight: "bold"
+  color: "#333333"
+  style: "normal"
+  linespacing: 1.2
+
+# Configuración avanzada del subtítulo (tiene precedencia sobre los valores básicos)
+subtitle_config:
+  x: 0.5
+  ha: "center"
+  fontsize: 20
+  color: "#666666"
+  style: "italic"
+  linespacing: 1
+
+# Configuración específica del gráfico de líneas
+linechart:
+  linewidth: 2.5          # Grosor de las líneas
+  linestyle: "-"          # Estilo de las líneas: "-", "--", "-.", ":"
+  alpha: 1.0              # Transparencia de las líneas
+  fill_area: false        # Si se debe rellenar el área bajo la línea
+  fill_alpha: 0.2         # Transparencia del área rellena
+  
+  # Configuración de marcadores
+  marker:
+    enabled: true         # Si se deben mostrar marcadores
+    size: 6               # Tamaño de los marcadores
+    symbol: "o"           # Símbolo del marcador: "o", "s", "^", "v", "<", ">", "d", "p", "*"
+    edgewidth: 1.5        # Grosor del borde del marcador
+    edgecolor: "white"    # Color del borde del marcador
+
+# Colores para las series
+colors:
+  serie1: "#1A535C"
+  serie2: "#FF6B6B"
+  serie3: "#4ECDC4"
+  serie4: "#F7B267"
+  serie5: "#3D5A80"
+
+# Etiquetas de valores
+value_labels:
+  show: false             # Mostrar etiquetas de valores
+  format: "{:.1f}"        # Formato de los valores
+  fontsize: 9             # Tamaño de la fuente
+  fontweight: "normal"    # Peso de la fuente
+  color: "#333333"        # Color de la fuente
+  background: true        # Si se debe mostrar un fondo
+  bg_color: "white"       # Color del fondo
+  bg_alpha: 0.7           # Transparencia del fondo
+  x_offset: 0             # Desplazamiento horizontal
+  y_offset: 5             # Desplazamiento vertical
+  ha: "center"            # Alineación horizontal
+  va: "bottom"            # Alineación vertical
+  only_last: false        # Solo mostrar la última etiqueta
+  only_first: false       # Solo mostrar la primera etiqueta
+  skip: 1                 # Mostrar cada N puntos
+
+# Configuración del eje X
+xaxis:
+  title: "Eje X"          # Título del eje X
+  title_fontsize: 12      # Tamaño de la fuente del título
+  title_color: "#333333"  # Color del título
+  title_fontweight: "normal"  # Peso de la fuente del título
+  show_ticks: true        # Mostrar las marcas
+  show_labels: true       # Mostrar las etiquetas
+  font:
+    size: 10              # Tamaño de la fuente de las etiquetas
+    color: "#333333"      # Color de la fuente de las etiquetas
+
+# Configuración del eje Y
+yaxis:
+  title: "Eje Y"          # Título del eje Y
+  title_fontsize: 12      # Tamaño de la fuente del título
+  title_color: "#333333"  # Color del título
+  title_fontweight: "normal"  # Peso de la fuente del título
+  show_ticks: true        # Mostrar las marcas
+  show_labels: true       # Mostrar las etiquetas
+  font:
+    size: 10              # Tamaño de la fuente de las etiquetas
+    color: "#333333"      # Color de la fuente de las etiquetas
+
+# Configuración de leyenda
+legend: true
+legend_loc: "best"
+
+# Configuración avanzada de leyenda
+legend_config:
+  loc: "best"
+  bbox_to_anchor: null
+  ncol: 1
+  fontsize: 10
+  frameon: true
+  title: ""
+  title_fontsize: 12
+  title_fontweight: "bold"
+  borderpad: 0.4
+  labelspacing: 0.5
+  handlelength: 2.0
+  handleheight: 0.7
+  handletextpad: 0.8
+  borderaxespad: 0.5
+  columnspacing: 2.0
+  facecolor: "#ffffff"
+  edgecolor: "#dddddd"
+  framealpha: 0.9
+  shadow: false
+  fancybox: true
+
+# Grid
+grid:
+  show: true              # Mostrar grid
+  axis: "both"            # Eje para el grid: "x", "y", "both"
+  linestyle: "--"         # Estilo de línea
+  color: "#cccccc"        # Color del grid
+  alpha: 0.7              # Transparencia del grid
+  linewidth: 0.5          # Grosor de línea
+
+# Anotaciones de regiones
+annotations:
+  regions: []             # Lista de regiones para sombrear
+  # Ejemplo:
+  # regions:
+  #   - label: "Evento importante"
+  #     from: "2020-01-01"
+  #     to: "2020-06-30"
+  #     color: "#f8f8f8"
+  #     alpha: 0.3
+
+# Configuración del footer
+footer:
+  # Configuración general del footer
+  config:
+    y_position: 0.03
+    spacing: 0.02
+    show_frame: false
+    frame_padding: 0.01
+    frame_alpha: 0.08
+    frame_color: "#f0f0f0"
+  
+  # Texto de fuente
+  source: "Fuente: ConDatos, 2023"
+  source_fontsize: 9
+  source_color: "#666666"
+  
+  # Configuración avanzada del texto de fuente
+  source_config:
+    fontsize: 9
+    color: "#666666"
+    style: "italic"
+    weight: "normal"
+    family: "Nunito"
+    x_position: 0.15
+  
+  # Texto de nota/licencia
+  note: ""
+  note_fontsize: 9
+  note_color: "#666666"
+  
+  # Configuración avanzada de la nota
+  note_config:
+    fontsize: 9
+    color: "#666666"
+    style: "normal"
+    weight: "normal"
+    family: "Nunito"
+    x_position: 0.5
+    alignment: "center"
+  
+  # Logos
+  logos:
+    - path: ""
+      zoom: 0.15
+      x_position: 0.85
+      alignment: "right"
